@@ -1,0 +1,38 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "demo-base-fastapi"
+version = "1.0.0"
+description = "Demo FastAPI application"
+requires-python = ">=3.14"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers --maxfail=1"
+
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+markers = [
+  "unit: fast unit tests",
+  "integration: integration tests",
+  "release: release tests",
+]
+
+log_cli = true
+log_cli_level = "INFO"
+
+filterwarnings = [
+  "error::DeprecationWarning:your_package.*",
+  "ignore::DeprecationWarning",
+]
+
+norecursedirs = [".git", ".venv", "dist", "build"]
+
+[tool.pytest_env]
+DEPLOYMENT_TYPE = "test"

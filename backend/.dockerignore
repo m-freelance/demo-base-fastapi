@@ -1,0 +1,53 @@
+# .dockerignore for backend
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Local config (use environment variables in Docker)
+.env
+.env.local
+
+# Git
+.git/
+.gitignore
+
+# Data (should be mounted as volume)
+data/logs/*
+!data/logs/.gitkeep
+
+# Documentation
+*.md
+docs/
+
+# Misc
+.DS_Store
+Thumbs.db
+

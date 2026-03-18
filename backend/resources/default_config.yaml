@@ -1,0 +1,46 @@
+api:
+  title: Demo API
+  host: localhost
+  port: 8000
+  origins: []
+  allow_credentials: Yes
+  allow_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+  database:
+    url: ${DATABASE_URL}
+    pool_size: 5
+    max_overflow: 10
+    pool_pre_ping: true
+    echo: No
+  middleware:
+    error_middleware:
+      return_detailed_internal_errors: Yes
+    auth_middleware:
+      path_access:
+        - path: /api/v1/users/me
+          allowed_roles: [user, admin]
+          methods: [GET]
+
+        - path: /api/v1/users
+          allowed_roles: [admin]
+          methods: [GET, POST, PUT, DELETE]
+  jwt:
+    secret_key: ${JWT_SECRET_KEY:your-secret-key-change-in-production}
+    algorithm: HS256
+    access_token_expire_minutes: 30
+logging:
+    level: DEBUG
+    format: '%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s'
+    date_format: '%Y-%m-%d %H:%M:%S'
+    handlers:
+        - console
+        - file
+    file:
+        enabled: true
+        filename: ../data/logs/api.log
+        max_bytes: 10485760
+        backup_count: 5
+

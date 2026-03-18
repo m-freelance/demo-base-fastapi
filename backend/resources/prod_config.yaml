@@ -1,0 +1,5 @@
+api:
+  host: 0.0.0.0
+  middleware:
+    error_middleware:
+      return_detailed_internal_errors: No

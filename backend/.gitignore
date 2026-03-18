@@ -1,0 +1,3 @@
+# project specific gitignore file
+local_config.yaml
+.env

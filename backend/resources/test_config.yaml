@@ -1,0 +1,20 @@
+# Test-specific configuration overrides
+# This file is loaded when DEPLOYMENT_TYPE=test
+# Values here override default_config.yaml for testing
+
+api:
+  title: Demo API - Test
+  database:
+    url: postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
+    echo: No
+  middleware:
+    error_middleware:
+      return_detailed_internal_errors: Yes
+
+logging:
+  level: WARNING
+  handlers:
+    - console
+  file:
+    enabled: false
+
