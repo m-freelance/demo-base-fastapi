@@ -26,7 +26,7 @@ class TestAuthMiddleware:
     def jwt_config(self) -> JWTConfig:
         """Create a JWTConfig for testing."""
         return JWTConfig(
-            secret_key="test_secret_key_12345",
+            secret_key="test_secret_key_32_chars_long_xx",
             algorithm="HS256",
             access_token_expire_minutes=30,
         )

@@ -226,9 +226,11 @@ class TestTokenService:
         self, sample_token_data: TokenData
     ):
         """Test TokenService works with different algorithms."""
+        # Use a key that's long enough for all algorithms (64 bytes for SHA512)
+        secret_key = "test_secret_key_64_chars_long_for_sha512_xxxxxxxxxxxxxxxxxxxxxxx"
         for algorithm in ["HS256", "HS384", "HS512"]:
             jwt_config = JWTConfig(
-                secret_key="test_secret_key",
+                secret_key=secret_key,
                 algorithm=algorithm,
                 access_token_expire_minutes=30,
             )

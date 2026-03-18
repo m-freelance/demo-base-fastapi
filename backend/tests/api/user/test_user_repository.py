@@ -24,7 +24,10 @@ class TestUserRepositoryUnit:
     @pytest.fixture
     def mock_session(self) -> AsyncMock:
         """Create a mocked AsyncSession."""
-        return AsyncMock()
+        session = AsyncMock()
+        # session.add() is a synchronous method, so use MagicMock for it
+        session.add = MagicMock()
+        return session
 
     @pytest.fixture
     def sample_user(self) -> User:

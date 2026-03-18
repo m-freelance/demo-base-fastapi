@@ -85,10 +85,10 @@ jobs:
       - name: Run Unit Tests (dev branch)
         if: github.base_ref == 'dev'
         working-directory: backend
-        run: pytest -m unit -v
+        run: pytest -m unit -vv
 
       - name: Run Release Tests (main branch)
         if: github.base_ref == 'main'
         working-directory: backend
-        run: pytest -v
+        run: pytest -vv
 
