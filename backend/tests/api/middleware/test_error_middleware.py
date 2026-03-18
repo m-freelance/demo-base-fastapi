@@ -51,7 +51,7 @@ class TestErrorMiddleware:
         async def value_error_endpoint():
             raise ValueError("Invalid value provided")
 
-        app.add_middleware(ErrorMiddleware, config=error_config_detailed)
+        app.add_middleware(ErrorMiddleware, config=error_config_detailed)  # type: ignore[arg-type]
 
         return app
 
@@ -74,7 +74,7 @@ class TestErrorMiddleware:
         async def runtime_error_endpoint():
             raise RuntimeError("Runtime error occurred")
 
-        app.add_middleware(ErrorMiddleware, config=error_config_generic)
+        app.add_middleware(ErrorMiddleware, config=error_config_generic)  # type: ignore[arg-type]
 
         return app
 

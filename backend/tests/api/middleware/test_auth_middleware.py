@@ -26,7 +26,7 @@ class TestAuthMiddleware:
     def jwt_config(self) -> JWTConfig:
         """Create a JWTConfig for testing."""
         return JWTConfig(
-            secret_key="test_secret_key_12345",
+            secret_key="test_secret_key_32_chars_long_xx",
             algorithm="HS256",
             access_token_expire_minutes=30,
         )
@@ -112,7 +112,7 @@ class TestAuthMiddleware:
             return {"status": "ok"}
 
         app.add_middleware(
-            AuthMiddleware,
+            AuthMiddleware,  # type: ignore[arg-type]
             config=auth_middleware_config,
             jwt_config=jwt_config,
         )
@@ -318,7 +318,7 @@ class TestAuthMiddleware:
         async def unprotected_put():
             return {"message": "Unprotected PUT"}
 
-        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)
+        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)  # type: ignore[arg-type]
 
         client = TestClient(app, raise_server_exceptions=False)
 
@@ -357,7 +357,7 @@ class TestAuthMiddleware:
         async def public_with_optional_auth():
             return {"message": "Public"}
 
-        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)
+        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)  # type: ignore[arg-type]
 
         client = TestClient(app, raise_server_exceptions=False)
 

@@ -24,7 +24,10 @@ class TestUserRepositoryUnit:
     @pytest.fixture
     def mock_session(self) -> AsyncMock:
         """Create a mocked AsyncSession."""
-        return AsyncMock()
+        session = AsyncMock()
+        # session.add() is a synchronous method, so use MagicMock for it
+        session.add = MagicMock()
+        return session
 
     @pytest.fixture
     def sample_user(self) -> User:
@@ -234,6 +237,8 @@ class TestUserRepositoryRelease:
             "regular@example.com", db_session
         )
 
+        assert found_admin is not None
+        assert found_regular is not None
         assert found_admin.role == UserRole.ADMIN
         assert found_regular.role == UserRole.USER
 

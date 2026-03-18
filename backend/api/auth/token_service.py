@@ -45,6 +45,9 @@ class TokenService:
             minutes=self._jwt_config.access_token_expire_minutes
         )
 
+        if data.email is None or data.role is None:
+            raise ValueError("email and role are required to create an access token")
+
         token_payload = _TokenPayload(
             email=data.email,
             role=data.role,
