@@ -96,16 +96,16 @@ compile-deps:
 
 # Run all tests locally
 test-local:
-	PYTHONPATH=$(PWD) python -m pytest backend/tests -v
+	cd backend && PYTHONPATH=.. python -m pytest tests -v
 
 # Run only unit tests (fast, no database)
 test-local-unit:
-	PYTHONPATH=$(PWD) python -m pytest backend/tests -m "unit" -v
+	cd backend && PYTHONPATH=.. python -m pytest tests -m "unit" -v
 
 # Run only release tests (with database)
 test-local-release:
-	PYTHONPATH=$(PWD) python -m pytest backend/tests -m "release" -v
+	cd backend && PYTHONPATH=.. python -m pytest tests -m "release" -v
 
 # Run tests excluding release tests (for CI fast feedback)
 test-local-fast:
-	PYTHONPATH=$(PWD) python -m pytest backend/tests -m "not release" -v
+	cd backend && PYTHONPATH=.. python -m pytest tests -m "not release" -v

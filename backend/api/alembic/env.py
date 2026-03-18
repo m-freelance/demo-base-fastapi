@@ -22,8 +22,6 @@ target_metadata = Base.metadata
 config_service = get_config_service()
 database_url = config_service.config.api.database.url
 print(database_url)
-if database_url is not None:
-    target_metadata.bind = database_url
 config.set_main_option("sqlalchemy.url", database_url)
 
 

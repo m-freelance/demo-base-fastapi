@@ -12,6 +12,7 @@ import os
 import pytest
 import pytest_asyncio
 from typing import AsyncGenerator
+from backend.api.config.config_dependencies import get_config_service
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -32,7 +33,6 @@ def setup_test_environment():
     This runs once at the start of the test session.
     """
     # Clear the cached config service to ensure it reloads with test config
-    from backend.api.config.config_dependencies import get_config_service
 
     get_config_service.cache_clear()
 
@@ -47,17 +47,12 @@ def config_service():
     """
     Fixture that provides access to the ConfigService for tests that need it.
     """
-    from backend.api.config.config_dependencies import get_config_service
 
     return get_config_service()
 
 
-# ============================================================================
 # Database fixtures for release/integration tests
 # Uses in-memory SQLite for fast, isolated database testing
-# ============================================================================
-
-
 @pytest_asyncio.fixture(scope="function")
 async def async_engine():
     """

@@ -1,0 +1,94 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+env:
+  PYTHON_VERSION: '3.14'
+  MYPY_VERSION: '1.19.1'
+  BLACK_VERSION: '26.1.0'
+
+jobs:
+  black:
+    name: Black Formatter Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
+
+      - name: Install Black
+        run: pip install black==${{ env.BLACK_VERSION }}
+
+      - name: Run Black
+        working-directory: backend
+        run: black --check --diff .
+
+  mypy:
+    name: Mypy Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install --upgrade pip
+          pip install mypy==${{ env.MYPY_VERSION }}
+          pip install -r requirements.in
+
+      - name: Run Mypy
+        working-directory: backend
+        run: mypy . --ignore-missing-imports
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: [black, mypy]
+    env:
+      PYTHONPATH: ..
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.in
+          pip install -r requirements-dev.in
+
+      - name: Run Unit Tests (dev branch)
+        if: github.base_ref == 'dev'
+        working-directory: backend
+        run: pytest -m unit -vv
+
+      - name: Run Release Tests (main branch)
+        if: github.base_ref == 'main'
+        working-directory: backend
+        run: pytest -vv
+
