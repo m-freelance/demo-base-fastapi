@@ -3,6 +3,9 @@
 pip-tools>=7.0.0
 # Dependency management
 
+types-PyYAML>=6.0.0
+# Type stubs
+
 pytest-env>=1.0.0
 pytest-asyncio>=0.21.0
 pytest>=7.4.0

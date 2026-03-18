@@ -148,6 +148,7 @@ class TestTokenService:
         token_service = TokenService(jwt_config=jwt_config)
 
         # Manually create an expired token
+        assert sample_token_data.role is not None
         expired_payload = {
             "email": sample_token_data.email,
             "role": sample_token_data.role.value,

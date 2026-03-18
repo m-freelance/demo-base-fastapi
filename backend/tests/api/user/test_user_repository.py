@@ -234,6 +234,8 @@ class TestUserRepositoryRelease:
             "regular@example.com", db_session
         )
 
+        assert found_admin is not None
+        assert found_regular is not None
         assert found_admin.role == UserRole.ADMIN
         assert found_regular.role == UserRole.USER
 

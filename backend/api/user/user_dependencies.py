@@ -54,7 +54,7 @@ async def get_current_user_info(
     :return: The User object or None if user not authenticated
     """
     token_data: TokenData | None = getattr(request.state, "user_token_data", None)
-    if token_data is None:
+    if token_data is None or token_data.email is None:
         return None
 
     user = await user_repository.find_user_by_email(token_data.email, db_session)

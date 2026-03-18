@@ -1,6 +1,7 @@
 from backend.api.schemas.base import Base
 from uuid import uuid4
-from sqlalchemy import String, Column, Integer, Boolean, Enum as saEnum
+from sqlalchemy import String, Integer, Boolean, Enum as saEnum
+from sqlalchemy.orm import Mapped, mapped_column
 from enum import Enum, unique
 
 
@@ -13,12 +14,14 @@ class UserRole(str, Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=True)
-    user_uuid = Column(String, default=lambda: str(uuid4()), unique=True, index=True)
-    role = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    user_uuid: Mapped[str] = mapped_column(
+        String, default=lambda: str(uuid4()), unique=True, index=True
+    )
+    role: Mapped[UserRole] = mapped_column(
         saEnum(
             UserRole,
             values_callable=lambda t: [str(item.value) for item in t],

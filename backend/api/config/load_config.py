@@ -115,7 +115,7 @@ def load_and_merge_configs(config_paths: list[str]) -> dict:
     :param config_paths: List of paths to config files
     :return: Merged configuration dictionary
     """
-    config_data = {}
+    config_data: dict[str, object] = {}
     for path in config_paths:
         logger.info(f"loading configuration from {path}")
         yaml_data = load_yaml_file(path)

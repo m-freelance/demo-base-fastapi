@@ -83,9 +83,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.add_middleware(ErrorMiddleware, config=api_config.middleware.error_middleware)
+    app.add_middleware(ErrorMiddleware, config=api_config.middleware.error_middleware)  # type: ignore[arg-type]
     app.add_middleware(
-        AuthMiddleware,
+        AuthMiddleware,  # type: ignore[arg-type]
         config=api_config.middleware.auth_middleware,
         jwt_config=api_config.jwt,
     )

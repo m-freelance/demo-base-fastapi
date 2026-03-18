@@ -44,18 +44,21 @@ class AuthService:
         """
 
         encrypted_password = self._password_hasher.encrypt_password(user.password)
+        user_email = str(user.email)
 
-        user = User(
-            email=str(user.email),
+        new_user = User(
+            email=user_email,
             hashed_password=encrypted_password,
             role=UserRole.USER,
         )
 
-        if await self._auth_repository.find_user_by_email(user.email, self._db_session):
-            raise UserExistsException(user.email)
+        if await self._auth_repository.find_user_by_email(user_email, self._db_session):
+            raise UserExistsException(user_email)
 
         try:
-            result = await self._auth_repository.add_new_user(user, self._db_session)
+            result = await self._auth_repository.add_new_user(
+                new_user, self._db_session
+            )
             await self._db_session.commit()
         except Exception as e:
             raise UserCreateInternalErrorException(detail=str(e))

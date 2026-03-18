@@ -112,7 +112,7 @@ class TestAuthMiddleware:
             return {"status": "ok"}
 
         app.add_middleware(
-            AuthMiddleware,
+            AuthMiddleware,  # type: ignore[arg-type]
             config=auth_middleware_config,
             jwt_config=jwt_config,
         )
@@ -318,7 +318,7 @@ class TestAuthMiddleware:
         async def unprotected_put():
             return {"message": "Unprotected PUT"}
 
-        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)
+        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)  # type: ignore[arg-type]
 
         client = TestClient(app, raise_server_exceptions=False)
 
@@ -357,7 +357,7 @@ class TestAuthMiddleware:
         async def public_with_optional_auth():
             return {"message": "Public"}
 
-        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)
+        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)  # type: ignore[arg-type]
 
         client = TestClient(app, raise_server_exceptions=False)
 
