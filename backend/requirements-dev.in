@@ -1,9 +1,7 @@
 # requirements-dev.in
 
 pip-tools>=7.0.0
-# Dependency management
 
-types-PyYAML>=6.0.0
 # Type stubs
 
 pytest-env>=1.0.0

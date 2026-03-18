@@ -83,5 +83,5 @@ jobs:
       - name: Run Release Tests (main branch)
         if: github.base_ref == 'main'
         working-directory: backend
-        run: pytest -m release -v
+        run: pytest -v
 
