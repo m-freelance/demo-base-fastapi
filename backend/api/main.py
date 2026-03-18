@@ -13,10 +13,31 @@ from backend.api.middleware import ErrorMiddleware, AuthMiddleware
 from backend.api.router import api_router, health_router
 from backend.api.utils.get_logger import get_logger
 
-_TITLE = "FastAPI demo"
+_TITLE = "Demo Base FastAPI"
 
-# TODO: add more description here"
-_DESCRIPTION = "Fast API demo application... "
+_DESCRIPTION = """
+## 🚀 Production-Ready FastAPI Template
+
+A modern, async FastAPI application with authentication, user management, and PostgreSQL integration.
+
+### Features
+
+- **🔐 JWT Authentication** - Secure token-based authentication with Argon2 password hashing
+- **👤 User Management** - Registration, login, and user profile endpoints
+- **📄 Pagination** - Built-in pagination for list endpoints
+- **🗃️ Async Database** - PostgreSQL with SQLAlchemy 2.0 async support
+- **⚙️ Configuration** - YAML-based configuration with environment overrides
+
+### Authentication
+
+Protected endpoints require a Bearer token in the `Authorization` header:
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+Obtain a token by calling the `/api/v1/auth/login` endpoint.
+"""
+
 _VERSION = "1.0.0"
 
 
