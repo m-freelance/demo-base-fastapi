@@ -9,24 +9,28 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
 
+concurrency:
+  group: backend-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   PYTHON_VERSION: '3.14'
   MYPY_VERSION: '1.19.1'
   BLACK_VERSION: '26.1.0'
   ISORT_VERSION: '8.0.1'
+
 jobs:
-  black:
-    name: Black Formatter Check
+  lint-black:
+    name: Lint | Black
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           allow-prereleases: true
+          cache: pip
 
       - name: Install Black
         run: pip install black==${{ env.BLACK_VERSION }}
@@ -34,18 +38,18 @@ jobs:
       - name: Run Black
         working-directory: backend
         run: black --check --diff .
-  isort:
-    name: isort Import Sort Check
+
+  lint-isort:
+    name: Lint | isort
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           allow-prereleases: true
+          cache: pip
 
       - name: Install isort
         run: pip install isort==${{ env.ISORT_VERSION }}
@@ -53,50 +57,67 @@ jobs:
       - name: Run isort
         working-directory: backend
         run: isort --check-only --diff --profile black .
-  mypy:
-    name: Mypy Type Check
+
+  lint-mypy:
+    name: Lint | Mypy
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           allow-prereleases: true
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.in
+            backend/requirements-dev.in
 
       - name: Install dependencies
         working-directory: backend
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install mypy==${{ env.MYPY_VERSION }}
           pip install -r requirements.in
+          pip install -r requirements-dev.in
 
       - name: Run Mypy
         working-directory: backend
         run: mypy . --ignore-missing-imports
 
-  test:
-    name: Run Tests
+  lint:
+    name: Lint Stage
     runs-on: ubuntu-latest
-    needs: [black, mypy]
+    needs:
+      - lint-black
+      - lint-isort
+      - lint-mypy
+    steps:
+      - name: Lint stage passed
+        run: echo "All lint checks passed."
+
+  test:
+    name: Test Stage
+    runs-on: ubuntu-latest
+    needs: lint
     env:
       PYTHONPATH: ..
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           allow-prereleases: true
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.in
+            backend/requirements-dev.in
 
       - name: Install dependencies
         working-directory: backend
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.in
           pip install -r requirements-dev.in
 
@@ -109,4 +130,3 @@ jobs:
         if: github.base_ref == 'main'
         working-directory: backend
         run: pytest -vv
-
