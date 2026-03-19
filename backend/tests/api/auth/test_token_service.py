@@ -5,13 +5,15 @@ This module contains unit tests for JWT token creation and verification.
 """
 
 from datetime import datetime, timedelta, timezone
+
 import pytest
 
-from backend.api.auth.token_service import TokenService, TokenData
+from backend.api.auth.token_service import TokenData, TokenService
 from backend.api.config.models import JWTConfig
 from backend.api.schemas.user import UserRole
 
 
+@pytest.mark.unit
 class TestTokenService:
     """Tests for TokenService class."""
 
@@ -39,7 +41,6 @@ class TestTokenService:
         """Create admin TokenData for testing."""
         return TokenData(email="admin@example.com", role=UserRole.ADMIN)
 
-    @pytest.mark.unit
     def test_create_access_token_returns_string(
         self, token_service: TokenService, sample_token_data: TokenData
     ):
@@ -50,7 +51,6 @@ class TestTokenService:
         assert isinstance(token, str)
         assert len(token) > 0
 
-    @pytest.mark.unit
     def test_create_access_token_produces_jwt_format(
         self, token_service: TokenService, sample_token_data: TokenData
     ):
@@ -60,7 +60,6 @@ class TestTokenService:
         parts = token.split(".")
         assert len(parts) == 3
 
-    @pytest.mark.unit
     def test_verify_token_returns_token_data(
         self, token_service: TokenService, sample_token_data: TokenData
     ):
@@ -73,7 +72,6 @@ class TestTokenService:
         assert result.email == sample_token_data.email
         assert result.role == sample_token_data.role
 
-    @pytest.mark.unit
     def test_verify_token_returns_correct_role(
         self, token_service: TokenService, admin_token_data: TokenData
     ):
@@ -85,7 +83,6 @@ class TestTokenService:
         assert result is not None
         assert result.role == UserRole.ADMIN
 
-    @pytest.mark.unit
     def test_verify_token_with_invalid_token_returns_none(
         self, token_service: TokenService
     ):
@@ -94,7 +91,6 @@ class TestTokenService:
 
         assert result is None
 
-    @pytest.mark.unit
     def test_verify_token_with_tampered_token_returns_none(
         self, token_service: TokenService, sample_token_data: TokenData
     ):
@@ -107,7 +103,6 @@ class TestTokenService:
 
         assert result is None
 
-    @pytest.mark.unit
     def test_verify_token_with_wrong_secret_returns_none(
         self, sample_token_data: TokenData
     ):
@@ -133,7 +128,6 @@ class TestTokenService:
 
         assert result is None
 
-    @pytest.mark.unit
     def test_verify_token_with_expired_token_returns_none(
         self, sample_token_data: TokenData
     ):
@@ -167,7 +161,6 @@ class TestTokenService:
         # Expired tokens should return None
         assert result is None
 
-    @pytest.mark.unit
     def test_verify_token_with_empty_string_returns_none(
         self, token_service: TokenService
     ):
@@ -176,7 +169,6 @@ class TestTokenService:
 
         assert result is None
 
-    @pytest.mark.unit
     def test_create_access_token_different_users_produce_different_tokens(
         self, token_service: TokenService
     ):
@@ -189,7 +181,6 @@ class TestTokenService:
 
         assert token1 != token2
 
-    @pytest.mark.unit
     def test_create_access_token_same_user_produces_different_tokens_at_different_times(
         self, token_service: TokenService, sample_token_data: TokenData
     ):
@@ -207,7 +198,6 @@ class TestTokenService:
         assert result1 is not None
         assert result2 is not None
 
-    @pytest.mark.unit
     def test_verify_token_preserves_email_with_special_characters(
         self, token_service: TokenService
     ):
@@ -221,7 +211,6 @@ class TestTokenService:
         assert result is not None
         assert result.email == special_email
 
-    @pytest.mark.unit
     def test_token_service_with_different_algorithms(
         self, sample_token_data: TokenData
     ):

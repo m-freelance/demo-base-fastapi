@@ -144,6 +144,9 @@ demo-base-fastapi/
    uvicorn backend.api.main:app --reload
    ```
 
+Note that in the project is used `black` for code formatting`
+
+
 ## 📖 API Documentation
 
 The API provides interactive documentation at:
@@ -210,6 +213,12 @@ make migrate-dev       # Run migrations in dev environment
 
 # Dependencies
 make compile-deps      # Compile requirements.in to requirements.txt
+
+# Local development
+make test-local        # Run all tests locally
+make test-local-unit   # Run only unit tests locally
+make test-local-release # Run only release tests locally
+make test-local-fast   # Run tests excluding release tests locally
 ```
 
 ### Dependency Management

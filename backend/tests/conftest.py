@@ -9,16 +9,14 @@ This module sets up the test environment by:
 """
 
 import os
+from typing import AsyncGenerator
+
 import pytest
 import pytest_asyncio
-from typing import AsyncGenerator
-from backend.api.config.config_dependencies import get_config_service
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from backend.api.config.config_dependencies import get_config_service
 
 # Set deployment type to test before any imports that might load config
 os.environ["DEPLOYMENT_TYPE"] = "test"

@@ -8,17 +8,14 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.api.auth.token_service import TokenService, TokenData
-from backend.api.config.models import (
-    AuthMiddlewareConfig,
-    PathAccessConfig,
-    JWTConfig,
-    HttpMethod,
-)
+from backend.api.auth.token_service import TokenData, TokenService
+from backend.api.config.models import (AuthMiddlewareConfig, HttpMethod,
+                                       JWTConfig, PathAccessConfig)
 from backend.api.middleware.auth_middleware import AuthMiddleware
 from backend.api.schemas.user import UserRole
 
 
+@pytest.mark.unit
 class TestAuthMiddleware:
     """Tests for AuthMiddleware class."""
 
@@ -125,7 +122,6 @@ class TestAuthMiddleware:
         return TestClient(app_with_middleware, raise_server_exceptions=False)
 
     ### Public endpoint tests ###
-    @pytest.mark.unit
     def test_public_endpoint_accessible_without_auth(self, client: TestClient):
         """Test that public endpoints are accessible without authentication."""
         response = client.get("/api/public")
@@ -133,7 +129,6 @@ class TestAuthMiddleware:
         assert response.status_code == 200
         assert response.json() == {"message": "Public resource"}
 
-    @pytest.mark.unit
     def test_health_endpoint_accessible_without_auth(self, client: TestClient):
         """Test that health endpoint is accessible without authentication."""
         response = client.get("/health")
@@ -142,7 +137,6 @@ class TestAuthMiddleware:
         assert response.json() == {"status": "ok"}
 
     ### Protected endpoint tests ###
-    @pytest.mark.unit
     def test_protected_endpoint_requires_auth(self, client: TestClient):
         """Test that protected endpoints require authentication."""
         response = client.get("/api/protected")
@@ -150,7 +144,6 @@ class TestAuthMiddleware:
         assert response.status_code == 401
         assert "Authentication required" in response.json()["detail"]
 
-    @pytest.mark.unit
     def test_protected_endpoint_accessible_with_user_token(
         self, client: TestClient, user_token: str
     ):
@@ -163,7 +156,6 @@ class TestAuthMiddleware:
         assert response.status_code == 200
         assert response.json() == {"message": "Protected resource"}
 
-    @pytest.mark.unit
     def test_protected_endpoint_accessible_with_admin_token(
         self, client: TestClient, admin_token: str
     ):
@@ -175,7 +167,6 @@ class TestAuthMiddleware:
 
         assert response.status_code == 200
 
-    @pytest.mark.unit
     def test_protected_post_endpoint_accessible_with_valid_token(
         self, client: TestClient, user_token: str
     ):
@@ -188,14 +179,12 @@ class TestAuthMiddleware:
         assert response.status_code == 200
 
     ### Admin endpoint tests ###
-    @pytest.mark.unit
     def test_admin_endpoint_requires_auth(self, client: TestClient):
         """Test that admin endpoints require authentication."""
         response = client.get("/api/admin")
 
         assert response.status_code == 401
 
-    @pytest.mark.unit
     def test_admin_endpoint_denies_user_role(self, client: TestClient, user_token: str):
         """Test that admin endpoints deny USER role."""
         response = client.get(
@@ -206,7 +195,6 @@ class TestAuthMiddleware:
         assert response.status_code == 401
         assert "Insufficient permissions" in response.json()["detail"]
 
-    @pytest.mark.unit
     def test_admin_endpoint_accessible_with_admin_token(
         self, client: TestClient, admin_token: str
     ):
@@ -219,7 +207,6 @@ class TestAuthMiddleware:
         assert response.status_code == 200
         assert response.json() == {"message": "Admin resource"}
 
-    @pytest.mark.unit
     def test_admin_delete_endpoint_accessible_with_admin_token(
         self, client: TestClient, admin_token: str
     ):
@@ -232,7 +219,6 @@ class TestAuthMiddleware:
         assert response.status_code == 200
 
     ### Invalid token tests ###
-    @pytest.mark.unit
     def test_protected_endpoint_rejects_invalid_token(self, client: TestClient):
         """Test that protected endpoints reject invalid tokens."""
         response = client.get(
@@ -243,7 +229,6 @@ class TestAuthMiddleware:
         assert response.status_code == 401
         assert "Invalid or expired token" in response.json()["detail"]
 
-    @pytest.mark.unit
     def test_protected_endpoint_rejects_malformed_auth_header(self, client: TestClient):
         """Test that protected endpoints reject malformed auth headers."""
         response = client.get(
@@ -253,7 +238,6 @@ class TestAuthMiddleware:
 
         assert response.status_code == 401
 
-    @pytest.mark.unit
     def test_protected_endpoint_rejects_missing_bearer_prefix(
         self, client: TestClient, user_token: str
     ):
@@ -266,7 +250,6 @@ class TestAuthMiddleware:
         assert response.status_code == 401
 
     ### Token extraction tests ###
-    @pytest.mark.unit
     def test_extract_token_from_bearer_header(
         self, client: TestClient, user_token: str
     ):
@@ -278,7 +261,6 @@ class TestAuthMiddleware:
 
         assert response.status_code == 200
 
-    @pytest.mark.unit
     def test_extract_token_case_insensitive_bearer(
         self, client: TestClient, user_token: str
     ):
@@ -291,7 +273,6 @@ class TestAuthMiddleware:
         assert response.status_code == 200
 
     ### Method-specific protection tests ###
-    @pytest.mark.unit
     def test_unprotected_method_on_protected_path(
         self,
         jwt_config: JWTConfig,
@@ -331,7 +312,6 @@ class TestAuthMiddleware:
         assert get_response.status_code == 401
 
     ### Path prefix matching tests ###
-    @pytest.mark.unit
     def test_path_prefix_matching(self, client: TestClient, user_token: str):
         """Test that path prefix matching works correctly."""
         # /api/protected should match paths starting with /api/protected
@@ -342,7 +322,6 @@ class TestAuthMiddleware:
 
         assert response.status_code == 200
 
-    @pytest.mark.unit
     def test_public_endpoint_stores_token_data_when_provided(
         self,
         jwt_config: JWTConfig,

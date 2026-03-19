@@ -8,26 +8,21 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from backend.api.auth.auth_dtos import (LoginRequestDto, LoginResponseDto,
+                                        RegisterRequestDto,
+                                        RegisterResponseDto)
+from backend.api.auth.auth_exceptions import (InvalidCredentialsException,
+                                              UserCreateInternalErrorException,
+                                              UserExistsException)
 from backend.api.auth.auth_service import AuthService
-from backend.api.auth.auth_dtos import (
-    RegisterRequestDto,
-    RegisterResponseDto,
-    LoginRequestDto,
-    LoginResponseDto,
-)
-from backend.api.auth.auth_exceptions import (
-    UserExistsException,
-    UserCreateInternalErrorException,
-    InvalidCredentialsException,
-)
 from backend.api.auth.password_hasher import PasswordHasher
 from backend.api.auth.token_service import TokenService
 from backend.api.schemas.user import User, UserRole
 from backend.api.user.user_repository import UserRepository
 
 
-class TestAuthService:
-    """Unit tests for AuthService."""
+class TestAuthServiceBase:
+    """Base class with shared fixtures for AuthService tests."""
 
     @pytest.fixture
     def mock_user_repository(self) -> AsyncMock:
@@ -74,7 +69,7 @@ class TestAuthService:
     def sample_register_request(self) -> RegisterRequestDto:
         """Create a sample registration request."""
         return RegisterRequestDto(
-            email="newuser@example.com",
+            email="newuser@example.com",  # type: ignore
             password="securepassword123",
         )
 
@@ -90,8 +85,11 @@ class TestAuthService:
             role=UserRole.USER,
         )
 
-    ### add_new_user tests ###
-    @pytest.mark.unit
+
+@pytest.mark.unit
+class TestAuthServiceAddNewUser(TestAuthServiceBase):
+    """Unit tests for AuthService.add_new_user method."""
+
     @pytest.mark.asyncio
     async def test_add_new_user_success(
         self,
@@ -117,7 +115,6 @@ class TestAuthService:
         mock_user_repository.add_new_user.assert_called_once()
         mock_db_session.commit.assert_called_once()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_add_new_user_raises_exception_when_user_exists(
         self,
@@ -132,9 +129,8 @@ class TestAuthService:
         with pytest.raises(UserExistsException) as exc_info:
             await auth_service.add_new_user(user=sample_register_request)
 
-        assert sample_register_request.email in str(exc_info.value.detail)
+        assert sample_register_request.email in str(exc_info.value.detail)  # type: ignore
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_add_new_user_raises_internal_error_on_db_exception(
         self,
@@ -149,7 +145,6 @@ class TestAuthService:
         with pytest.raises(UserCreateInternalErrorException):
             await auth_service.add_new_user(user=sample_register_request)
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_add_new_user_encrypts_password(
         self,
@@ -169,7 +164,6 @@ class TestAuthService:
             sample_register_request.password
         )
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_add_new_user_creates_user_with_user_role(
         self,
@@ -189,8 +183,11 @@ class TestAuthService:
         user_arg = call_args[0][0]
         assert user_arg.role == UserRole.USER
 
-    ### login tests ###
-    @pytest.mark.unit
+
+@pytest.mark.unit
+class TestAuthServiceLogin(TestAuthServiceBase):
+    """Unit tests for AuthService.login method."""
+
     @pytest.mark.asyncio
     async def test_login_success(
         self,
@@ -216,7 +213,6 @@ class TestAuthService:
         assert result.token_type == "bearer"
         mock_token_service.create_access_token.assert_called_once()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_raises_exception_for_nonexistent_user(
         self,
@@ -234,7 +230,6 @@ class TestAuthService:
         with pytest.raises(InvalidCredentialsException):
             await auth_service.login(login_request=login_request)
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_raises_exception_for_wrong_password(
         self,
@@ -255,7 +250,6 @@ class TestAuthService:
         with pytest.raises(InvalidCredentialsException):
             await auth_service.login(login_request=login_request)
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_verifies_password(
         self,
@@ -279,7 +273,6 @@ class TestAuthService:
             "securepassword123", sample_user.hashed_password
         )
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_creates_token_with_correct_data(
         self,
@@ -305,7 +298,6 @@ class TestAuthService:
         assert token_data.email == sample_user.email
         assert token_data.role == sample_user.role
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_returns_bearer_token_type(
         self,
