@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 
 from backend.api.auth.auth_dependencies import get_auth_service
 from backend.api.auth.auth_dtos import (
+    LoginRequestDto,
+    LoginResponseDto,
     RegisterRequestDto,
     RegisterResponseDto,
-    LoginResponseDto,
-    LoginRequestDto,
 )
 from backend.api.auth.auth_service import AuthService
 

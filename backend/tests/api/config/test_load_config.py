@@ -9,12 +9,18 @@ from unittest.mock import patch
 
 import pytest
 
-from backend.api.config.load_config import (deep_merge,
-                                            get_config_paths_for_deployment,
-                                            parse_config,
-                                            replace_env_variables)
-from backend.api.config.models import (ApplicationConfig, HttpMethod,
-                                       LoggingHandlerType, LoggingLevel)
+from backend.api.config.load_config import (
+    deep_merge,
+    get_config_paths_for_deployment,
+    parse_config,
+    replace_env_variables,
+)
+from backend.api.config.models import (
+    ApplicationConfig,
+    HttpMethod,
+    LoggingHandlerType,
+    LoggingLevel,
+)
 from backend.api.schemas.user import UserRole
 from backend.api.utils.get_deployment_type import DeploymentType
 

@@ -1,12 +1,12 @@
-import jwt
 from datetime import datetime, timedelta, timezone
+
+import jwt
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from pydantic import BaseModel
+
+from backend.api.auth.auth_exceptions import InvalidTokenException
 from backend.api.config.models import JWTConfig
-from backend.api.auth.auth_exceptions import (
-    InvalidTokenException,
-)
 from backend.api.schemas import UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")

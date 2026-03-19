@@ -144,7 +144,16 @@ demo-base-fastapi/
    uvicorn backend.api.main:app --reload
    ```
 
-Note that in the project is used `black` for code formatting`
+### Additional Note
+In the project is used `black` and `isort` for code formatting, 
+import sorting and `mypy` for code checking. You can run them locally with:
+
+```bash
+   # apply code formatting
+   make format
+   # check code formatting
+   make format-check
+```
 
 
 ## 📖 API Documentation

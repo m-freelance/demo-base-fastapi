@@ -4,13 +4,13 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    async_sessionmaker,
     AsyncSession,
+    async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.exc import SQLAlchemyError
 
 from backend.api.db.db_exceptions import (
     DatabaseConnectionError,

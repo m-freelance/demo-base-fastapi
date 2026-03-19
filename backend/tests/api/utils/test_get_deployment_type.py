@@ -9,8 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from backend.api.utils.get_deployment_type import (DeploymentType,
-                                                   get_deployment_type)
+from backend.api.utils.get_deployment_type import DeploymentType, get_deployment_type
 
 
 @pytest.mark.unit

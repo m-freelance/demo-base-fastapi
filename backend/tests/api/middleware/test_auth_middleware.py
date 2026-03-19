@@ -9,8 +9,12 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from backend.api.auth.token_service import TokenData, TokenService
-from backend.api.config.models import (AuthMiddlewareConfig, HttpMethod,
-                                       JWTConfig, PathAccessConfig)
+from backend.api.config.models import (
+    AuthMiddlewareConfig,
+    HttpMethod,
+    JWTConfig,
+    PathAccessConfig,
+)
 from backend.api.middleware.auth_middleware import AuthMiddleware
 from backend.api.schemas.user import UserRole
 

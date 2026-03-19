@@ -13,8 +13,7 @@ from fastapi_pagination import Page, add_pagination
 
 from backend.api.auth.token_service import oauth2_scheme
 from backend.api.schemas.user import User, UserRole
-from backend.api.user.user_dependencies import (get_current_user_info,
-                                                get_user_service)
+from backend.api.user.user_dependencies import get_current_user_info, get_user_service
 from backend.api.user.user_router import router
 
 

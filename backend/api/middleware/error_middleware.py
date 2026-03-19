@@ -1,7 +1,7 @@
 import json
 
+from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request, FastAPI, HTTPException, Response
 
 from backend.api.config.models import ErrorMiddlewareConfig
 from backend.api.utils.get_logger import get_logger

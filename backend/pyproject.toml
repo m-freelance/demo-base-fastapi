@@ -36,3 +36,7 @@ norecursedirs = [".git", ".venv", "dist", "build"]
 
 [tool.pytest_env]
 DEPLOYMENT_TYPE = "test"
+
+[tool.isort]
+profile = "black"
+

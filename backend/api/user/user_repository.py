@@ -1,8 +1,9 @@
 from fastapi_pagination import Page
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_pagination.ext.sqlalchemy import paginate
-from backend.api.schemas.user import User
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.api.schemas.user import User
 
 
 class UserRepository:

@@ -8,12 +8,17 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from backend.api.auth.auth_dtos import (LoginRequestDto, LoginResponseDto,
-                                        RegisterRequestDto,
-                                        RegisterResponseDto)
-from backend.api.auth.auth_exceptions import (InvalidCredentialsException,
-                                              UserCreateInternalErrorException,
-                                              UserExistsException)
+from backend.api.auth.auth_dtos import (
+    LoginRequestDto,
+    LoginResponseDto,
+    RegisterRequestDto,
+    RegisterResponseDto,
+)
+from backend.api.auth.auth_exceptions import (
+    InvalidCredentialsException,
+    UserCreateInternalErrorException,
+    UserExistsException,
+)
 from backend.api.auth.auth_service import AuthService
 from backend.api.auth.password_hasher import PasswordHasher
 from backend.api.auth.token_service import TokenService

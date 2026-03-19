@@ -111,4 +111,7 @@ test-local-fast:
 	cd backend && PYTHONPATH=.. python -m pytest tests -m "not release" -v
 
 format:
-	cd backend && black . && isort .
+	cd backend && isort . && black .
+
+format-check:
+	cd backend && isort --check-only . && black --check . && mypy . --ignore-missing-imports

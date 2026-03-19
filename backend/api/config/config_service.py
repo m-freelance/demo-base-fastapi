@@ -1,5 +1,5 @@
-from backend.api.config.models import ApplicationConfig
 from backend.api.config.load_config import get_config_from_files
+from backend.api.config.models import ApplicationConfig
 
 
 class ConfigService:

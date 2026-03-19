@@ -12,11 +12,16 @@ from fastapi.testclient import TestClient
 from pydantic import UUID4
 
 from backend.api.auth.auth_dependencies import get_auth_service
-from backend.api.auth.auth_dtos import (LoginResponseDto, RegisterRequestDto,
-                                        RegisterResponseDto)
-from backend.api.auth.auth_exceptions import (InvalidCredentialsException,
-                                              UserCreateInternalErrorException,
-                                              UserExistsException)
+from backend.api.auth.auth_dtos import (
+    LoginResponseDto,
+    RegisterRequestDto,
+    RegisterResponseDto,
+)
+from backend.api.auth.auth_exceptions import (
+    InvalidCredentialsException,
+    UserCreateInternalErrorException,
+    UserExistsException,
+)
 from backend.api.auth.auth_router import router
 
 
