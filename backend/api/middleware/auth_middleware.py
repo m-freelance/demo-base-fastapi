@@ -1,9 +1,9 @@
-from fastapi import Request, FastAPI
+from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from backend.api.auth.token_service import TokenService, TokenData
-from backend.api.config.models import AuthMiddlewareConfig, PathAccessConfig, JWTConfig
+from backend.api.auth.token_service import TokenData, TokenService
+from backend.api.config.models import AuthMiddlewareConfig, JWTConfig, PathAccessConfig
 from backend.api.schemas.user import UserRole
 
 

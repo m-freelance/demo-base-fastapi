@@ -1,11 +1,11 @@
+from functools import lru_cache
+
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.auth.auth_service import AuthService
 from backend.api.auth.password_hasher import PasswordHasher
 from backend.api.auth.token_service import TokenService
-from functools import lru_cache
-
 from backend.api.db.db_dependencies import get_db_session
 from backend.api.user.user_dependencies import get_user_repository
 from backend.api.user.user_repository import UserRepository

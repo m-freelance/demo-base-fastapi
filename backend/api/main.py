@@ -1,15 +1,15 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
 import uvicorn
+from fastapi import FastAPI
 from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
+
 from backend.api.auth.token_service import TokenService
 from backend.api.config.config_dependencies import get_config_service
 from backend.api.config.config_service import ConfigService
 from backend.api.db import AsyncDBClient
-
-from backend.api.middleware import ErrorMiddleware, AuthMiddleware
+from backend.api.middleware import AuthMiddleware, ErrorMiddleware
 from backend.api.router import api_router, health_router
 from backend.api.utils.get_logger import get_logger
 

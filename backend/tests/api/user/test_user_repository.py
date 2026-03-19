@@ -6,13 +6,15 @@ This module contains:
 - Release tests: Integration tests using a real (in-memory SQLite) database
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from backend.api.user.user_repository import UserRepository
+import pytest
+
 from backend.api.schemas.user import User, UserRole
+from backend.api.user.user_repository import UserRepository
 
 
+@pytest.mark.unit
 class TestUserRepositoryUnit:
     """Unit tests for UserRepository using mocked dependencies."""
 
@@ -41,7 +43,6 @@ class TestUserRepositoryUnit:
             role=UserRole.USER,
         )
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_add_new_user_adds_to_session(
         self, repository: UserRepository, mock_session: AsyncMock, sample_user: User
@@ -54,7 +55,6 @@ class TestUserRepositoryUnit:
         mock_session.add.assert_called_once_with(sample_user)
         assert result == sample_user
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_find_user_by_email_returns_user_when_found(
         self, repository: UserRepository, mock_session: AsyncMock, sample_user: User
@@ -72,7 +72,6 @@ class TestUserRepositoryUnit:
         assert result == sample_user
         mock_session.execute.assert_called_once()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_find_user_by_email_returns_none_when_not_found(
         self, repository: UserRepository, mock_session: AsyncMock
@@ -92,7 +91,6 @@ class TestUserRepositoryUnit:
         assert result is None
         mock_session.execute.assert_called_once()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_all_users_calls_paginate(
         self, repository: UserRepository, mock_session: AsyncMock

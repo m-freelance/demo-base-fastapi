@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from backend.api.config.config_service import ConfigService
 
 

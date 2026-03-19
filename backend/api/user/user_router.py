@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from fastapi_pagination import Page, Params
+
 from backend.api.auth.token_service import oauth2_scheme
 from backend.api.schemas.user import User
-from backend.api.user.user_dependencies import get_user_service, get_current_user_info
+from backend.api.user.user_dependencies import get_current_user_info, get_user_service
 from backend.api.user.user_dtos import GetUserResponseDto
 from backend.api.user.user_service import UserService
 

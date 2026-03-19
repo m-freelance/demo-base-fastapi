@@ -14,6 +14,7 @@ from backend.api.user.user_repository import UserRepository
 from backend.api.user.user_service import UserService
 
 
+@pytest.mark.unit
 class TestUserService:
     """Unit tests for UserService."""
 
@@ -91,7 +92,6 @@ class TestUserService:
         return MagicMock()
 
     ### get_all_users tests ###
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_all_users_returns_page(
         self,
@@ -110,7 +110,6 @@ class TestUserService:
         assert len(result.items) == 2
         mock_user_repository.get_all_users.assert_called_once()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_all_users_returns_empty_page_when_no_users(
         self,
@@ -127,7 +126,6 @@ class TestUserService:
         assert result.total == 0
         assert len(result.items) == 0
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_all_users_passes_session_to_repository(
         self,
@@ -145,7 +143,6 @@ class TestUserService:
         call_args = mock_user_repository.get_all_users.call_args
         assert call_args[0][0] == mock_db_session
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_all_users_passes_page_params_to_repository(
         self,
@@ -163,7 +160,6 @@ class TestUserService:
         assert call_args[0][1] == mock_page_params
 
     ### get_user_by_email tests ###
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_user_by_email_returns_user_when_found(
         self,
@@ -182,7 +178,6 @@ class TestUserService:
             "testuser@example.com", user_service._db_session
         )
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_user_by_email_returns_none_when_not_found(
         self,
@@ -196,7 +191,6 @@ class TestUserService:
 
         assert result is None
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_user_by_email_returns_admin_user(
         self,
@@ -212,7 +206,6 @@ class TestUserService:
         assert result is not None
         assert result.role == UserRole.ADMIN
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_user_by_email_passes_session_to_repository(
         self,

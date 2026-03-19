@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import Form
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import UUID4, EmailStr, Field
 
 from backend.api.utils.dtos import DTOBase
-from pydantic import Field, UUID4, EmailStr
 
 
 class AuthDto(DTOBase): ...

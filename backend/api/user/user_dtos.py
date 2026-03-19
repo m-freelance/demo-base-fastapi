@@ -1,6 +1,6 @@
-from pydantic import Field, UUID4
+from pydantic import UUID4, Field
 
-from backend.api.schemas import UserRole, User
+from backend.api.schemas import User, UserRole
 from backend.api.utils.dtos import DTOBase
 
 
