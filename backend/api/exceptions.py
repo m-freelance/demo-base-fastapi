@@ -1,5 +1,6 @@
 from fastapi import HTTPException
-from backend.api.utils.get_deployment_type import get_deployment_type, DeploymentType
+
+from backend.api.utils.get_deployment_type import DeploymentType, get_deployment_type
 
 
 ### Base exception classes for the application. ###

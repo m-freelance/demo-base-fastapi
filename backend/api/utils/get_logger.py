@@ -1,4 +1,6 @@
 import os
+from logging import Formatter, Logger, StreamHandler, getLogger
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from backend.api.config.config_dependencies import get_config_service
@@ -8,9 +10,6 @@ from backend.api.config.models import (
     LoggingFileConfig,
     LoggingHandlerType,
 )
-
-from logging import Logger, getLogger, StreamHandler, Formatter
-from logging.handlers import RotatingFileHandler
 
 
 def get_logger(name: str) -> Logger:

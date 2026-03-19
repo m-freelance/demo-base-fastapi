@@ -13,7 +13,7 @@ from fastapi_pagination import Page, add_pagination
 
 from backend.api.auth.token_service import oauth2_scheme
 from backend.api.schemas.user import User, UserRole
-from backend.api.user.user_dependencies import get_user_service, get_current_user_info
+from backend.api.user.user_dependencies import get_current_user_info, get_user_service
 from backend.api.user.user_router import router
 
 
@@ -137,6 +137,7 @@ def client(app):
 
 
 ### GET /users/me endpoint tests ###
+@pytest.mark.unit
 class TestGetMeEndpoint:
     """Tests for the GET /users/me endpoint."""
 
@@ -223,6 +224,7 @@ class TestGetMeEndpoint:
 
 
 ### GET /users endpoint tests ###
+@pytest.mark.unit
 class TestGetAllUsersEndpoint:
     """Tests for the GET /users endpoint."""
 

@@ -144,6 +144,18 @@ demo-base-fastapi/
    uvicorn backend.api.main:app --reload
    ```
 
+### Additional Note
+In the project is used `black` and `isort` for code formatting, 
+import sorting and `mypy` for code checking. You can run them locally with:
+
+```bash
+   # apply code formatting
+   make format
+   # check code formatting
+   make format-check
+```
+
+
 ## 📖 API Documentation
 
 The API provides interactive documentation at:
@@ -210,6 +222,12 @@ make migrate-dev       # Run migrations in dev environment
 
 # Dependencies
 make compile-deps      # Compile requirements.in to requirements.txt
+
+# Local development
+make test-local        # Run all tests locally
+make test-local-unit   # Run only unit tests locally
+make test-local-release # Run only release tests locally
+make test-local-fast   # Run tests excluding release tests locally
 ```
 
 ### Dependency Management

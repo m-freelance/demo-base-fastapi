@@ -1,12 +1,13 @@
+import logging
+import os
+import re
+
+import yaml
 from pydantic import ValidationError
 
-from .models import ApplicationConfig
-from backend.api.utils.get_deployment_type import get_deployment_type, DeploymentType
+from backend.api.utils.get_deployment_type import DeploymentType, get_deployment_type
 
-import os
-import yaml
-import logging
-import re
+from .models import ApplicationConfig
 
 _BASE_CONFIG_PATHS = "resources/default_config.yaml;resources/local_config.yaml"
 _TEST_CONFIG_PATHS = "resources/default_config.yaml;resources/test_config.yaml"

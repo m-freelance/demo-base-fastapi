@@ -12,17 +12,17 @@ from fastapi.testclient import TestClient
 from pydantic import UUID4
 
 from backend.api.auth.auth_dependencies import get_auth_service
-from backend.api.auth.auth_router import router
 from backend.api.auth.auth_dtos import (
-    RegisterResponseDto,
     LoginResponseDto,
     RegisterRequestDto,
+    RegisterResponseDto,
 )
 from backend.api.auth.auth_exceptions import (
-    UserExistsException,
-    UserCreateInternalErrorException,
     InvalidCredentialsException,
+    UserCreateInternalErrorException,
+    UserExistsException,
 )
+from backend.api.auth.auth_router import router
 
 
 ### FIXTURES ###
@@ -71,10 +71,10 @@ def client(app, mock_auth_service):
 ### TESTS ###
 
 
+@pytest.mark.unit
 class TestRegisterEndpoint:
     """Tests for POST /auth/register endpoint."""
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_register_user_success(
         self, client, override_auth_service, mock_auth_service
@@ -95,7 +95,6 @@ class TestRegisterEndpoint:
             )
         )
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_register_user_already_exists(self, client, app, mock_auth_service):
         """Test registration when user already exists."""
@@ -115,7 +114,6 @@ class TestRegisterEndpoint:
 
         app.dependency_overrides.clear()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_register_user_internal_error(self, client, app, mock_auth_service):
         """Test registration when an internal error occurs."""
@@ -135,7 +133,6 @@ class TestRegisterEndpoint:
 
         app.dependency_overrides.clear()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_register_user_invalid_email_format(
         self, client, override_auth_service
@@ -148,7 +145,6 @@ class TestRegisterEndpoint:
 
         assert response.status_code == 422  # Validation error
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_register_user_password_too_short(
         self, client, override_auth_service
@@ -161,7 +157,6 @@ class TestRegisterEndpoint:
 
         assert response.status_code == 422  # Validation error
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_register_user_missing_email(self, client, override_auth_service):
         """Test registration with missing email field."""
@@ -193,10 +188,10 @@ class TestRegisterEndpoint:
         assert response.status_code == 422  # Validation error
 
 
+@pytest.mark.unit
 class TestLoginEndpoint:
     """Tests for POST /auth/login endpoint."""
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_user_success(self, client, override_auth_service):
         """Test successful user login."""
@@ -211,7 +206,6 @@ class TestLoginEndpoint:
         assert data["token_type"] == "bearer"
         assert data["access_token"] == "test_jwt_token_12345"
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_user_invalid_credentials(self, client, app, mock_auth_service):
         """Test login with invalid credentials."""
@@ -229,7 +223,6 @@ class TestLoginEndpoint:
 
         app.dependency_overrides.clear()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_user_nonexistent_user(self, client, app, mock_auth_service):
         """Test login with a non-existent user."""
@@ -245,7 +238,6 @@ class TestLoginEndpoint:
 
         app.dependency_overrides.clear()
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_user_missing_username(self, client, override_auth_service):
         """Test login with missing username field."""
@@ -256,7 +248,6 @@ class TestLoginEndpoint:
 
         assert response.status_code == 422  # Validation error
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_user_missing_password(self, client, override_auth_service):
         """Test login with missing password field."""
@@ -267,7 +258,6 @@ class TestLoginEndpoint:
 
         assert response.status_code == 422  # Validation error
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_user_empty_body(self, client, override_auth_service):
         """Test login with empty request body."""
@@ -278,7 +268,6 @@ class TestLoginEndpoint:
 
         assert response.status_code == 422  # Validation error
 
-    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_login_calls_auth_service_with_correct_data(
         self, client, app, mock_auth_service, mock_login_response

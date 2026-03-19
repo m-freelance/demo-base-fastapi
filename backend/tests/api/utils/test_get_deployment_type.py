@@ -9,13 +9,13 @@ from unittest.mock import patch
 
 import pytest
 
-from backend.api.utils.get_deployment_type import get_deployment_type, DeploymentType
+from backend.api.utils.get_deployment_type import DeploymentType, get_deployment_type
 
 
+@pytest.mark.unit
 class TestGetDeploymentType:
     """Tests for get_deployment_type function."""
 
-    @pytest.mark.unit
     def test_returns_local_by_default(self):
         """Test that LOCAL is returned when DEPLOYMENT_TYPE is not set."""
         with patch.dict(os.environ, {}, clear=True):
@@ -26,7 +26,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.LOCAL
 
-    @pytest.mark.unit
     def test_returns_local_when_set_to_local(self):
         """Test that LOCAL is returned when DEPLOYMENT_TYPE is 'local'."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "local"}):
@@ -34,7 +33,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.LOCAL
 
-    @pytest.mark.unit
     def test_returns_test_when_set_to_test(self):
         """Test that TEST is returned when DEPLOYMENT_TYPE is 'test'."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "test"}):
@@ -42,7 +40,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.TEST
 
-    @pytest.mark.unit
     def test_returns_development_when_set_to_dev(self):
         """Test that DEVELOPMENT is returned when DEPLOYMENT_TYPE is 'dev'."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "dev"}):
@@ -50,7 +47,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.DEVELOPMENT
 
-    @pytest.mark.unit
     def test_returns_production_when_set_to_prod(self):
         """Test that PRODUCTION is returned when DEPLOYMENT_TYPE is 'prod'."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "prod"}):
@@ -58,7 +54,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.PRODUCTION
 
-    @pytest.mark.unit
     def test_case_insensitive_local(self):
         """Test that deployment type detection is case-insensitive for LOCAL."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "LOCAL"}):
@@ -66,7 +61,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.LOCAL
 
-    @pytest.mark.unit
     def test_case_insensitive_test(self):
         """Test that deployment type detection is case-insensitive for TEST."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "TEST"}):
@@ -74,7 +68,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.TEST
 
-    @pytest.mark.unit
     def test_case_insensitive_dev(self):
         """Test that deployment type detection is case-insensitive for DEV."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "DEV"}):
@@ -82,7 +75,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.DEVELOPMENT
 
-    @pytest.mark.unit
     def test_case_insensitive_prod(self):
         """Test that deployment type detection is case-insensitive for PROD."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "PROD"}):
@@ -90,7 +82,6 @@ class TestGetDeploymentType:
 
             assert result == DeploymentType.PRODUCTION
 
-    @pytest.mark.unit
     def test_raises_error_for_invalid_deployment_type(self):
         """Test that ValueError is raised for invalid deployment type."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "invalid"}):
@@ -100,7 +91,6 @@ class TestGetDeploymentType:
             assert "Invalid DEPLOYMENT_TYPE" in str(exc_info.value)
             assert "invalid" in str(exc_info.value)
 
-    @pytest.mark.unit
     def test_error_message_contains_valid_options(self):
         """Test that error message contains list of valid options."""
         with patch.dict(os.environ, {"DEPLOYMENT_TYPE": "invalid"}):
@@ -114,30 +104,26 @@ class TestGetDeploymentType:
             assert "prod" in error_message
 
 
+@pytest.mark.unit
 class TestDeploymentTypeEnum:
     """Tests for DeploymentType enum."""
 
-    @pytest.mark.unit
     def test_local_value(self):
         """Test LOCAL enum value."""
         assert DeploymentType.LOCAL.value == "local"
 
-    @pytest.mark.unit
     def test_test_value(self):
         """Test TEST enum value."""
         assert DeploymentType.TEST.value == "test"
 
-    @pytest.mark.unit
     def test_development_value(self):
         """Test DEVELOPMENT enum value."""
         assert DeploymentType.DEVELOPMENT.value == "dev"
 
-    @pytest.mark.unit
     def test_production_value(self):
         """Test PRODUCTION enum value."""
         assert DeploymentType.PRODUCTION.value == "prod"
 
-    @pytest.mark.unit
     def test_all_deployment_types_exist(self):
         """Test that all expected deployment types exist."""
         expected_types = ["LOCAL", "TEST", "DEVELOPMENT", "PRODUCTION"]

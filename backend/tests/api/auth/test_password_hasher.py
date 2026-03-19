@@ -9,6 +9,7 @@ import pytest
 from backend.api.auth.password_hasher import PasswordHasher
 
 
+@pytest.mark.unit
 class TestPasswordHasher:
     """Tests for PasswordHasher class."""
 
@@ -22,7 +23,6 @@ class TestPasswordHasher:
         """Return a sample password for testing."""
         return "securepassword123"
 
-    @pytest.mark.unit
     def test_encrypt_password_returns_hashed_string(
         self, password_hasher: PasswordHasher, sample_password: str
     ):
@@ -33,7 +33,6 @@ class TestPasswordHasher:
         assert isinstance(hashed, str)
         assert hashed != sample_password
 
-    @pytest.mark.unit
     def test_encrypt_password_produces_different_hashes_for_same_password(
         self, password_hasher: PasswordHasher, sample_password: str
     ):
@@ -44,7 +43,6 @@ class TestPasswordHasher:
         # Argon2 uses salt, so hashes should differ
         assert hash1 != hash2
 
-    @pytest.mark.unit
     def test_encrypt_password_produces_different_hashes_for_different_passwords(
         self, password_hasher: PasswordHasher
     ):
@@ -54,7 +52,6 @@ class TestPasswordHasher:
 
         assert hash1 != hash2
 
-    @pytest.mark.unit
     def test_verify_password_returns_true_for_correct_password(
         self, password_hasher: PasswordHasher, sample_password: str
     ):
@@ -65,7 +62,6 @@ class TestPasswordHasher:
 
         assert result is True
 
-    @pytest.mark.unit
     def test_verify_password_returns_false_for_incorrect_password(
         self, password_hasher: PasswordHasher, sample_password: str
     ):
@@ -76,7 +72,6 @@ class TestPasswordHasher:
 
         assert result is False
 
-    @pytest.mark.unit
     def test_verify_password_returns_false_for_empty_password(
         self, password_hasher: PasswordHasher, sample_password: str
     ):
@@ -87,7 +82,6 @@ class TestPasswordHasher:
 
         assert result is False
 
-    @pytest.mark.unit
     def test_encrypt_empty_password(self, password_hasher: PasswordHasher):
         """Test that encrypt_password handles empty string."""
         hashed = password_hasher.encrypt_password("")
@@ -96,7 +90,6 @@ class TestPasswordHasher:
         assert isinstance(hashed, str)
         assert password_hasher.verify_password("", hashed) is True
 
-    @pytest.mark.unit
     def test_encrypt_password_with_special_characters(
         self, password_hasher: PasswordHasher
     ):
@@ -107,7 +100,6 @@ class TestPasswordHasher:
         assert hashed is not None
         assert password_hasher.verify_password(special_password, hashed) is True
 
-    @pytest.mark.unit
     def test_encrypt_password_with_unicode_characters(
         self, password_hasher: PasswordHasher
     ):
@@ -118,7 +110,6 @@ class TestPasswordHasher:
         assert hashed is not None
         assert password_hasher.verify_password(unicode_password, hashed) is True
 
-    @pytest.mark.unit
     def test_verify_password_is_case_sensitive(self, password_hasher: PasswordHasher):
         """Test that password verification is case-sensitive."""
         password = "SecurePassword"
@@ -128,7 +119,6 @@ class TestPasswordHasher:
         assert password_hasher.verify_password("SECUREPASSWORD", hashed) is False
         assert password_hasher.verify_password("SecurePassword", hashed) is True
 
-    @pytest.mark.unit
     def test_hashed_password_contains_argon2_identifier(
         self, password_hasher: PasswordHasher, sample_password: str
     ):

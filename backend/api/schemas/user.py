@@ -1,8 +1,12 @@
-from backend.api.schemas.base import Base
-from uuid import uuid4
-from sqlalchemy import String, Integer, Boolean, Enum as saEnum
-from sqlalchemy.orm import Mapped, mapped_column
 from enum import Enum, unique
+from uuid import uuid4
+
+from sqlalchemy import Boolean
+from sqlalchemy import Enum as saEnum
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from backend.api.schemas.base import Base
 
 
 @unique

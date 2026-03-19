@@ -35,36 +35,6 @@ docker compose up -d
 docker compose --profile dev up -d backend-dev
 ```
 
-## Using the Makefile
-
-For convenience, you can use the provided Makefile:
-
-```bash
-# Show available commands
-make help
-
-# Build production image
-make build
-
-# Start production services
-make up
-
-# Start development services
-make up-dev
-
-# View logs
-make logs
-
-# Stop services
-make down
-
-# Run tests
-make test
-
-# Clean up
-make clean
-```
-
 ## Docker Services
 
 | Service | Description | Port |

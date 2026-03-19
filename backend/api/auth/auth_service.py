@@ -2,20 +2,20 @@ from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.auth.auth_dtos import (
-    RegisterRequestDto,
-    RegisterResponseDto,
     LoginRequestDto,
     LoginResponseDto,
+    RegisterRequestDto,
+    RegisterResponseDto,
 )
 from backend.api.auth.auth_exceptions import (
-    UserExistsException,
-    UserCreateInternalErrorException,
     InvalidCredentialsException,
+    UserCreateInternalErrorException,
+    UserExistsException,
 )
-from backend.api.auth.token_service import TokenService, TokenData
-from backend.api.user.user_repository import UserRepository
 from backend.api.auth.password_hasher import PasswordHasher
+from backend.api.auth.token_service import TokenData, TokenService
 from backend.api.schemas import User, UserRole
+from backend.api.user.user_repository import UserRepository
 
 
 class AuthService:

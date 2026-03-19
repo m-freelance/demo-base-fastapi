@@ -13,7 +13,7 @@ env:
   PYTHON_VERSION: '3.14'
   MYPY_VERSION: '1.19.1'
   BLACK_VERSION: '26.1.0'
-
+  ISORT_VERSION: '8.0.1'
 jobs:
   black:
     name: Black Formatter Check
@@ -34,7 +34,25 @@ jobs:
       - name: Run Black
         working-directory: backend
         run: black --check --diff .
+  isort:
+    name: isort Import Sort Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
+
+      - name: Install isort
+        run: pip install isort==${{ env.ISORT_VERSION }}
+
+      - name: Run isort
+        working-directory: backend
+        run: isort --check-only --diff --profile black .
   mypy:
     name: Mypy Type Check
     runs-on: ubuntu-latest
