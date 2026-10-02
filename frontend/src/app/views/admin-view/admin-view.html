@@ -1,0 +1,151 @@
+<div class="admin-view ds-view">
+  <div class="ds-page">
+    <div class="ds-page__row">
+      <div class="ds-page__col">
+
+        <!-- Header -->
+        <div class="ds-page__header">
+          <h2 class="ds-page__title">
+            <i class="bi bi-people-fill ds-icon"></i>
+            User Management
+          </h2>
+          @if (totalUsers() > 0) {
+            <span class="ds-badge ds-badge--neutral ds-badge--large">
+              Total: {{ totalUsers() }} users
+            </span>
+          }
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoading()) {
+          <div class="ds-card">
+            <div class="ds-card__body ds-card__state">
+              <div class="ds-spinner ds-spinner--primary" role="status">
+                <span class="ds-visually-hidden">Loading...</span>
+              </div>
+              <p class="ds-text-muted">Loading users...</p>
+            </div>
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (error() && !isLoading()) {
+          <div class="ds-alert ds-alert--danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill ds-icon"></i>
+            Failed to load users.
+            @if (error()?.status === 401) {
+              <span>You don't have permission to view this page.</span>
+            } @else {
+              <span>Please try again later.</span>
+            }
+          </div>
+        }
+
+        <!-- Users Table -->
+        @if (!isLoading() && !error() && users().length > 0) {
+          <div class="ds-card ds-card--raised">
+            <div class="ds-card__header ds-card__header--inverse">
+              <h5 class="ds-card__title">
+                <i class="bi bi-table ds-icon"></i>
+                All Users
+              </h5>
+            </div>
+            <div class="ds-card__body ds-card__body--flush">
+              <div class="ds-table-scroll">
+                <table class="ds-table ds-table--hover">
+                  <thead class="ds-table__head">
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">UUID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (user of users(); track user.user_uuid; let i = $index) {
+                      <tr>
+                        <td>{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+                        <td>
+                          <i class="bi bi-envelope ds-icon ds-text-muted"></i>
+                          {{ user.email }}
+                        </td>
+                        <td>
+                          <span class="ds-badge"
+                                [class.ds-badge--danger]="isAdmin(user.role)"
+                                [class.ds-badge--primary]="!isAdmin(user.role)">
+                            {{ user.role | uppercase }}
+                          </span>
+                        </td>
+                        <td>
+                          @if (user.is_active) {
+                            <span class="ds-badge ds-badge--success">
+                              <i class="bi bi-check-circle"></i>
+                              Active
+                            </span>
+                          } @else {
+                            <span class="ds-badge ds-badge--neutral">
+                              <i class="bi bi-x-circle"></i>
+                              Inactive
+                            </span>
+                          }
+                        </td>
+                        <td>
+                          <code class="ds-text-muted ds-text-small">{{ user.user_uuid }}</code>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            @if (totalPages() > 1) {
+              <div class="ds-card__footer">
+                <nav aria-label="Users pagination">
+                  <ul class="ds-pagination">
+                    <li class="ds-pagination__item" [class.ds-pagination__item--disabled]="currentPage() <= 1">
+                      <button class="ds-pagination__link" (click)="previousPage()" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                      </button>
+                    </li>
+
+                    @for (page of paginationPages(); track page) {
+                      <li class="ds-pagination__item" [class.ds-pagination__item--active]="page === currentPage()">
+                        <button class="ds-pagination__link" (click)="goToPage(page)">
+                          {{ page }}
+                        </button>
+                      </li>
+                    }
+
+                    <li class="ds-pagination__item" [class.ds-pagination__item--disabled]="currentPage() >= totalPages()">
+                      <button class="ds-pagination__link" (click)="nextPage()" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+                <p class="pagination-summary ds-text-centered ds-text-muted ds-text-small">
+                  Page {{ currentPage() }} of {{ totalPages() }}
+                </p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Empty State -->
+        @if (!isLoading() && !error() && users().length === 0) {
+          <div class="ds-card">
+            <div class="ds-card__body ds-card__state">
+              <i class="bi bi-people ds-icon--display ds-text-muted"></i>
+              <h5>No Users Found</h5>
+              <p class="ds-text-muted">There are no users in the system yet.</p>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>

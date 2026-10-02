@@ -1,0 +1,121 @@
+// Top navigation bar. Below the large breakpoint the link area collapses and
+// the toggle button drives it; the component owns the open and closed classes.
+@use '../tokens/breakpoints' as breakpoints;
+
+.ds-nav {
+  background-color: var(--ds-color-surface-inverse);
+  color: var(--ds-color-text-inverse);
+  min-height: var(--ds-layout-nav-height);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  z-index: var(--ds-z-nav);
+}
+
+.ds-nav__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-3);
+  width: 100%;
+}
+
+.ds-nav__brand {
+  font-size: var(--ds-font-size-lg);
+  color: var(--ds-color-text-inverse);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--ds-color-text-inverse);
+    text-decoration: none;
+  }
+}
+
+.ds-nav__toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--ds-space-1) var(--ds-space-2);
+  margin-inline-start: auto;
+  border: var(--ds-border-width) solid var(--ds-color-border-inverse);
+  border-radius: var(--ds-radius-md);
+  cursor: pointer;
+
+  @media (min-width: breakpoints.$breakpoint-lg) {
+    display: none;
+  }
+}
+
+// Three bars drawn with gradients, so the toggle needs no extra markup.
+.ds-nav__toggle-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0 20%,
+    currentcolor 20% 32%,
+    transparent 32% 44%,
+    currentcolor 44% 56%,
+    transparent 56% 68%,
+    currentcolor 68% 80%,
+    transparent 80% 100%
+  );
+  color: var(--ds-color-text-inverse);
+}
+
+.ds-nav__collapse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-basis: 100%;
+  flex-grow: 1;
+  gap: var(--ds-space-3);
+
+  @media (min-width: breakpoints.$breakpoint-lg) {
+    flex-basis: auto;
+  }
+}
+
+.ds-nav__list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  @media (min-width: breakpoints.$breakpoint-lg) {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+  }
+}
+
+// Pushes the account and sign out group to the far end on wide screens.
+.ds-nav__list--end {
+  @media (min-width: breakpoints.$breakpoint-lg) {
+    margin-inline-start: auto;
+    gap: var(--ds-space-6);
+  }
+}
+
+.ds-nav__item {
+  display: flex;
+  align-items: center;
+}
+
+// Inactive links fade with opacity rather than a second color token, so they
+// stay legible whatever the bar is painted with.
+.ds-nav__link {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-space-2) var(--ds-space-2);
+  color: var(--ds-color-text-inverse);
+  opacity: 0.65;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--ds-color-text-inverse);
+    opacity: 0.85;
+    text-decoration: none;
+  }
+}
+
+.ds-nav__link--active {
+  opacity: 1;
+}

@@ -26,18 +26,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          allow-prereleases: true
-          cache: pip
-
-      - name: Install Black
-        run: pip install black==${{ env.BLACK_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
 
       - name: Run Black
         working-directory: backend
-        run: black --check --diff .
+        run: uvx black@${{ env.BLACK_VERSION }} --check --diff .
 
   lint-isort:
     name: Lint | isort
@@ -45,18 +42,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          allow-prereleases: true
-          cache: pip
-
-      - name: Install isort
-        run: pip install isort==${{ env.ISORT_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
 
       - name: Run isort
         working-directory: backend
-        run: isort --check-only --diff --profile black .
+        run: uvx isort@${{ env.ISORT_VERSION }} --check-only --diff --profile black .
 
   lint-mypy:
     name: Lint | Mypy
@@ -64,26 +58,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          allow-prereleases: true
-          cache: pip
-          cache-dependency-path: |
-            backend/requirements.in
-            backend/requirements-dev.in
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
 
+      # the lockfile gives mypy the real dependency set, then the pin above wins
       - name: Install dependencies
         working-directory: backend
         run: |
-          python -m pip install --upgrade pip
-          pip install mypy==${{ env.MYPY_VERSION }}
-          pip install -r requirements.in
-          pip install -r requirements-dev.in
+          uv sync --frozen
+          uv pip install mypy==${{ env.MYPY_VERSION }}
 
       - name: Run Mypy
         working-directory: backend
-        run: mypy . --ignore-missing-imports
+        run: uv run --no-sync mypy . --ignore-missing-imports
 
   lint:
     name: Lint Stage
@@ -105,28 +95,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          allow-prereleases: true
-          cache: pip
-          cache-dependency-path: |
-            backend/requirements.in
-            backend/requirements-dev.in
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
 
       - name: Install dependencies
         working-directory: backend
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.in
-          pip install -r requirements-dev.in
+        run: uv sync --frozen
 
       - name: Run Unit Tests (dev branch)
         if: github.base_ref == 'dev'
         working-directory: backend
-        run: pytest -m unit -vv
+        run: uv run --frozen pytest -m unit -vv
 
       - name: Run Release Tests (main branch)
         if: github.base_ref == 'main'
         working-directory: backend
-        run: pytest -vv
+        run: uv run --frozen pytest -vv

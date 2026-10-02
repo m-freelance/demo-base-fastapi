@@ -25,7 +25,6 @@ class TokenData(BaseModel):
 class _TokenPayload(BaseModel):
     email: str
     role: UserRole
-    expired: datetime
 
 
 class TokenService:
@@ -41,19 +40,20 @@ class TokenService:
         :return: Encoded JWT token as a string
         """
 
+        if data.email is None or data.role is None:
+            raise ValueError("email and role are required to create an access token")
+
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=self._jwt_config.access_token_expire_minutes
         )
 
-        if data.email is None or data.role is None:
-            raise ValueError("email and role are required to create an access token")
-
         token_payload = _TokenPayload(
             email=data.email,
             role=data.role,
-            expired=expire,
         )
+        # "exp" is the standard JWT claim name PyJWT checks on decode.
         to_encode = token_payload.model_dump(mode="json")
+        to_encode["exp"] = expire
 
         encoded_jwt_token = jwt.encode(
             to_encode,
@@ -68,10 +68,11 @@ class TokenService:
 
         :param token: JWT token string to verify
 
-        :return: TokenData containing the decoded email from the token
+        :return: TokenData with the decoded email and role, or None if the
+            token is invalid, tampered, or expired
 
-        :raises InvalidTokenException: If the token is invalid
-        :raises ExpiredTokenException: If the token has expired
+        :raises InvalidTokenException: If the token is well-formed and signed
+            correctly but its payload is missing required fields
         """
         try:
             payload = jwt.decode(
@@ -79,14 +80,14 @@ class TokenService:
                 self._jwt_config.secret_key,
                 algorithms=[self._jwt_config.algorithm],
             )
-
-            try:
-                token_payload = TokenData(**payload)
-            except Exception as e:
-                raise InvalidTokenException(detail="Invalid token payload: " + str(e))
-            return token_payload
-
         except ExpiredSignatureError:
             return None
-        except InvalidTokenError as e:
+        except InvalidTokenError:
             return None
+
+        try:
+            token_payload = _TokenPayload(**payload)
+        except Exception as e:
+            raise InvalidTokenException(detail="Invalid token payload: " + str(e))
+
+        return TokenData(email=token_payload.email, role=token_payload.role)

@@ -1,0 +1,14 @@
+// The design system entry point. Global styles pull in this one file.
+//
+// Load order matters: tokens declare the custom properties, the reset gives
+// bare elements a baseline, and the patterns build on both.
+
+@use 'tokens/tokens';
+@use 'patterns/reset';
+@use 'patterns/layout';
+@use 'patterns/nav';
+@use 'patterns/card';
+@use 'patterns/form';
+@use 'patterns/button';
+@use 'patterns/table';
+@use 'patterns/feedback';

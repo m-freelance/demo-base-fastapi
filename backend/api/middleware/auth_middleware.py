@@ -85,15 +85,37 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     def _find_matching_path_config(self, request_path: str) -> PathAccessConfig | None:
         """
-        Find a matching PathAccessConfig for the given request path.
+        Find the most specific matching PathAccessConfig for the given request path.
+
+        Matching is done on whole path segments, so a configured path only matches
+        the request path itself or a path that continues after a "/" boundary. If
+        more than one configured path matches, the longest one wins, so the result
+        does not depend on the order entries are listed in config.
 
         :param request_path: The request URL path
-        :return: Matching PathAccessConfig or None if path is public
+        :return: The most specific matching PathAccessConfig, or None if the path is public
         """
-        for path_config in self._config.path_access:
-            if request_path.startswith(path_config.path):
-                return path_config
-        return None
+        matches = [
+            path_config
+            for path_config in self._config.path_access
+            if self._path_matches(request_path, path_config.path)
+        ]
+        if not matches:
+            return None
+        return max(matches, key=lambda path_config: len(path_config.path))
+
+    @staticmethod
+    def _path_matches(request_path: str, configured_path: str) -> bool:
+        """
+        Check if a request path matches a configured path on segment boundaries.
+
+        :param request_path: The request URL path
+        :param configured_path: The configured path prefix to match against
+        :return: True if request_path equals configured_path or continues after a "/"
+        """
+        return request_path == configured_path or request_path.startswith(
+            configured_path + "/"
+        )
 
     def _extract_token_from_header(self, request: Request) -> str | None:
         """

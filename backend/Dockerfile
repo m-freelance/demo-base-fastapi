@@ -1,7 +1,10 @@
 ### Build dependencies ###
-# the stage is used to compile dependencies and create a virtual environment
+# the stage is used to resolve dependencies and create a virtual environment
 # this allows us to keep the final image small and only include runtime dependencies
 FROM python:3.14-slim AS builder
+
+# uv ships its own image, so the build never needs pip
+COPY --from=ghcr.io/astral-sh/uv:0.11.23 /uv /bin/uv
 
 WORKDIR /backend
 
@@ -11,23 +14,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# install pip-tools for dependency compilation
-RUN pip install --no-cache-dir pip-tools
+# the environment sits outside the workdir so a bind mount cannot shadow it
+# UV_PYTHON_DOWNLOADS=never keeps uv on the interpreter from the base image
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON=/usr/local/bin/python3 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
 # copy dependency files
-COPY requirements.in .
-COPY requirements-dev.in .
+COPY pyproject.toml uv.lock ./
 
-# compile dependencies
-RUN pip-compile requirements.in -o requirements.txt --strip-extras
-RUN pip-compile requirements-dev.in -o requirements-dev.txt --strip-extras
+# install production dependencies from the lockfile
+RUN uv sync --frozen --no-dev
 
-# install dependencies into a virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+### Add the dev dependency group on top of the production environment ###
+FROM builder AS builder-dev
 
-# install production dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv sync --frozen
 
 ### Build the final production image ###
 FROM python:3.14-slim AS production
@@ -83,11 +87,8 @@ FROM production AS development
 
 USER root
 
-# copy compiled dev requirements from builder
-COPY --from=builder /backend/requirements-dev.txt .
-
-# install development dependencies
-RUN /opt/venv/bin/pip install --no-cache-dir -r requirements-dev.txt
+# swap in the environment that also carries the dev dependency group
+COPY --from=builder-dev --chown=appuser:appgroup /opt/venv /opt/venv
 
 USER appuser
 

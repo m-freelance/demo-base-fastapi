@@ -1,0 +1,133 @@
+// Baseline element styling. This replaces the normalization the app used to get
+// from Bootstrap's reboot layer, so dropping Bootstrap does not change how bare
+// elements render.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--ds-color-surface-page);
+  color: var(--ds-color-text-default);
+  font-family: var(--ds-font-family-base);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-tight);
+  margin-bottom: var(--ds-space-2);
+}
+
+h1 {
+  font-size: var(--ds-font-size-2xl);
+}
+h2 {
+  font-size: var(--ds-font-size-xl);
+}
+h3 {
+  font-size: var(--ds-font-size-lg);
+}
+h4 {
+  font-size: var(--ds-font-size-lg);
+}
+h5 {
+  font-size: var(--ds-font-size-md);
+}
+h6 {
+  font-size: var(--ds-font-size-md);
+}
+
+p {
+  margin-bottom: var(--ds-space-4);
+}
+
+// Last child in a block should not push the container open.
+h1:last-child,
+h2:last-child,
+h3:last-child,
+h4:last-child,
+h5:last-child,
+h6:last-child,
+p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--ds-color-text-link);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--ds-color-text-link-hover);
+    text-decoration: underline;
+  }
+}
+
+strong,
+b {
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+small {
+  font-size: var(--ds-font-size-sm);
+}
+
+code {
+  font-family: var(--ds-font-family-mono);
+  font-size: var(--ds-font-size-sm);
+}
+
+hr {
+  border: 0;
+  border-top: var(--ds-border-width) solid var(--ds-color-border);
+  margin: var(--ds-space-4) 0;
+  opacity: 1;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+}
+
+:focus-visible {
+  outline: var(--ds-border-width-strong) solid var(--ds-color-primary);
+  outline-offset: 2px;
+}

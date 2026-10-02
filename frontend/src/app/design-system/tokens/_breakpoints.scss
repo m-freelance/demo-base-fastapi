@@ -1,0 +1,8 @@
+// Breakpoints have to be Sass variables: a media query cannot read var().
+// They live apart from _tokens.scss because this file emits no CSS, so a
+// component stylesheet can use it without duplicating the :root block.
+
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;

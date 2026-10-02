@@ -1,0 +1,32 @@
+<nav class="ds-nav">
+  <div class="ds-nav__inner">
+    <a class="ds-nav__brand" href="#">Demo</a>
+    <button class="ds-nav__toggle" type="button" (click)="toggleNavbar()" [attr.aria-expanded]="!isNavbarCollapsed()" aria-controls="navbarNav" aria-label="Toggle navigation">
+      <span class="ds-nav__toggle-icon"></span>
+    </button>
+    <div class="ds-nav__collapse" [class.is-collapsed]="isNavbarCollapsed()" [class.is-open]="!isNavbarCollapsed()" id="navbarNav">
+      <ul class="ds-nav__list">
+        @if (isAdmin()) {
+          <li class="ds-nav__item">
+            <a class="ds-nav__link" routerLink="/admin" routerLinkActive="ds-nav__link--active">
+              <i class="bi bi-people-fill ds-icon"></i>
+              <span>Users</span>
+            </a>
+          </li>
+        }
+      </ul>
+      <ul class="ds-nav__list ds-nav__list--end">
+        <li class="ds-nav__item">
+          <a class="ds-nav__link" routerLink="/profile" routerLinkActive="ds-nav__link--active">
+            <i class="bi bi-person-circle ds-icon"></i>
+            <span> {{ this.userEmail() }} </span>
+          </a>
+
+        </li>
+        <li class="ds-nav__item">
+          <button class="ds-button ds-button--primary" (click)="logout()"><i class="bi bi-box-arrow-right ds-icon ds-icon--bare"></i></button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

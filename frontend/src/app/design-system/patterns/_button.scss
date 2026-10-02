@@ -1,0 +1,83 @@
+// Buttons. The variants are the ones the templates need: a filled primary
+// action, a quiet bordered action, and a filled danger action.
+
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-base);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-easing-standard),
+    border-color var(--ds-duration-fast) var(--ds-easing-standard),
+    color var(--ds-duration-fast) var(--ds-easing-standard);
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem var(--ds-color-primary-ring);
+  }
+}
+
+.ds-button--primary {
+  background-color: var(--ds-color-primary);
+  border-color: var(--ds-color-primary);
+  color: var(--ds-color-primary-on);
+
+  &:hover:not(:disabled) {
+    background-color: var(--ds-color-primary-hover);
+    border-color: var(--ds-color-primary-hover);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--ds-color-primary-active);
+    border-color: var(--ds-color-primary-active);
+  }
+}
+
+.ds-button--danger {
+  background-color: var(--ds-color-danger);
+  border-color: var(--ds-color-danger);
+  color: var(--ds-color-danger-on);
+
+  &:hover:not(:disabled) {
+    background-color: var(--ds-color-danger-hover);
+    border-color: var(--ds-color-danger-hover);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--ds-color-danger-ring);
+  }
+}
+
+// Quiet bordered button, used for the password reveal toggle.
+.ds-button--quiet {
+  background-color: var(--ds-color-surface-raised);
+  border-color: var(--ds-color-border-strong);
+  color: var(--ds-color-text-muted);
+
+  &:hover:not(:disabled) {
+    background-color: var(--ds-color-neutral);
+    border-color: var(--ds-color-neutral);
+    color: var(--ds-color-neutral-on);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--ds-color-neutral-ring);
+  }
+}
+
+.ds-button--block {
+  width: 100%;
+}

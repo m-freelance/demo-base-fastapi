@@ -3,12 +3,15 @@ Tests for UserRepository.
 
 This module contains:
 - Unit tests: Fast tests using mocked database sessions
+- Integration tests: Run locally against a real (in-memory SQLite) database,
+  for paths where mocking would hide a real wiring bug (e.g. pagination)
 - Release tests: Integration tests using a real (in-memory SQLite) database
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from fastapi_pagination import Params
 
 from backend.api.schemas.user import User, UserRole
 from backend.api.user.user_repository import UserRepository
@@ -92,25 +95,109 @@ class TestUserRepositoryUnit:
         mock_session.execute.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_all_users_calls_paginate(
+    async def test_get_all_users_calls_apaginate(
         self, repository: UserRepository, mock_session: AsyncMock
     ):
-        """Test that get_all_users calls the paginate function."""
+        """Test that get_all_users calls the apaginate function.
+
+        apaginate is the async entry point in fastapi_pagination.ext.sqlalchemy.
+        The sync paginate function does not accept an AsyncSession, so this is
+        the one that must be wired up.
+        """
         # Arrange
         mock_page_params = MagicMock()
         mock_page = MagicMock()
 
         with patch(
-            "backend.api.user.user_repository.paginate",
+            "backend.api.user.user_repository.apaginate",
             new_callable=AsyncMock,
             return_value=mock_page,
-        ) as mock_paginate:
+        ) as mock_apaginate:
             # Act
             result = await repository.get_all_users(mock_session, mock_page_params)
 
             # Assert
-            mock_paginate.assert_called_once()
+            mock_apaginate.assert_called_once()
             assert result == mock_page
+
+
+@pytest.mark.integration
+class TestUserRepositoryIntegration:
+    """Integration tests for get_all_users against a real aiosqlite database.
+
+    These run locally (not gated behind the release marker) because mocking
+    the database session here hides real wiring bugs: fastapi_pagination's
+    sync paginate() does not accept an AsyncSession at all, and a mock-based
+    test cannot catch that kind of break when the pagination library changes.
+    """
+
+    @pytest.fixture
+    def repository(self) -> UserRepository:
+        """Create a UserRepository instance for testing."""
+        return UserRepository()
+
+    def create_user(
+        self,
+        email: str,
+        role: UserRole = UserRole.USER,
+    ) -> User:
+        """Helper to create a user instance."""
+        return User(
+            email=email,
+            hashed_password="hashed_password_123",
+            is_active=True,
+            role=role,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_all_users_returns_users_from_database(
+        self, repository: UserRepository, db_session
+    ):
+        """Test that get_all_users retrieves users actually persisted in the database."""
+        # Arrange
+        await repository.add_new_user(self.create_user("user1@example.com"), db_session)
+        await repository.add_new_user(self.create_user("user2@example.com"), db_session)
+        await db_session.flush()
+
+        # Act
+        page = await repository.get_all_users(db_session, Params(page=1, size=10))
+
+        # Assert
+        emails = {user.email for user in page.items}
+        assert emails == {"user1@example.com", "user2@example.com"}
+        assert page.total == 2
+
+    @pytest.mark.asyncio
+    async def test_get_all_users_respects_page_size(
+        self, repository: UserRepository, db_session
+    ):
+        """Test that get_all_users honors the page size from Params."""
+        # Arrange
+        for i in range(5):
+            await repository.add_new_user(
+                self.create_user(f"user{i}@example.com"), db_session
+            )
+        await db_session.flush()
+
+        # Act
+        page = await repository.get_all_users(db_session, Params(page=1, size=2))
+
+        # Assert
+        assert len(page.items) == 2
+        assert page.total == 5
+        assert page.pages == 3
+
+    @pytest.mark.asyncio
+    async def test_get_all_users_returns_empty_page_when_no_users(
+        self, repository: UserRepository, db_session
+    ):
+        """Test that get_all_users returns an empty page for an empty database."""
+        # Act
+        page = await repository.get_all_users(db_session, Params(page=1, size=10))
+
+        # Assert
+        assert page.items == []
+        assert page.total == 0
 
 
 @pytest.mark.release

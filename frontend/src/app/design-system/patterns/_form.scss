@@ -1,0 +1,104 @@
+// Form field: a label, an optional leading addon, the control itself and an
+// optional hint line.
+
+.ds-field {
+  display: block;
+  margin-bottom: var(--ds-space-4);
+}
+
+// A trailing field should not push the card footer away.
+.ds-card__body > .ds-field:last-child {
+  margin-bottom: 0;
+}
+
+.ds-field__label {
+  display: inline-block;
+  margin-bottom: var(--ds-space-2);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-regular);
+}
+
+.ds-field__control {
+  display: block;
+  width: 100%;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background-color: var(--ds-color-surface-raised);
+  border: var(--ds-border-width) solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-color-text-default);
+  line-height: var(--ds-line-height-base);
+  transition:
+    border-color var(--ds-duration-fast) var(--ds-easing-standard),
+    box-shadow var(--ds-duration-fast) var(--ds-easing-standard);
+
+  &::placeholder {
+    color: var(--ds-color-text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--ds-color-primary);
+    box-shadow: 0 0 0 0.25rem var(--ds-color-primary-ring);
+  }
+
+  &:disabled {
+    background-color: var(--ds-color-surface-disabled);
+    color: var(--ds-color-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.ds-field__hint {
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+}
+
+// Addon, control and trailing button joined into one visual control.
+.ds-field__group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+
+  > * {
+    border-radius: 0;
+  }
+
+  > :first-child {
+    border-start-start-radius: var(--ds-radius-md);
+    border-end-start-radius: var(--ds-radius-md);
+  }
+
+  > :last-child {
+    border-start-end-radius: var(--ds-radius-md);
+    border-end-end-radius: var(--ds-radius-md);
+  }
+
+  // The focused control has to sit above its neighbours so its ring is whole.
+  > :focus,
+  > :focus-visible {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ds-field__control {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+
+  // Collapse the doubled border between adjacent parts.
+  > * + * {
+    margin-inline-start: calc(var(--ds-border-width) * -1);
+  }
+}
+
+.ds-field__addon {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background-color: var(--ds-color-surface-sunken);
+  border: var(--ds-border-width) solid var(--ds-color-border);
+  color: var(--ds-color-text-muted);
+  white-space: nowrap;
+}

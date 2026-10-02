@@ -351,3 +351,88 @@ class TestAuthMiddleware:
         )
 
         assert response.status_code == 200
+
+    ### Most-specific-match tests (order independence) ###
+    def test_more_specific_path_wins_when_listed_after_the_broader_one(
+        self, jwt_config: JWTConfig, user_token: str
+    ):
+        """Test that a longer, more specific path rule is applied even when a
+        shorter, broader rule for the same prefix is listed first.
+
+        This mirrors backend/resources/default_config.yaml's two /api/v1/users
+        rules, but with the broad admin-only rule listed before the specific
+        /me rule. Matching must not depend on which entry comes first.
+        """
+        config = AuthMiddlewareConfig(
+            path_access=[
+                PathAccessConfig(
+                    path="/api/v1/users",
+                    allowed_roles=[UserRole.ADMIN],
+                    methods=[HttpMethod.GET, HttpMethod.POST],
+                ),
+                PathAccessConfig(
+                    path="/api/v1/users/me",
+                    allowed_roles=[UserRole.USER, UserRole.ADMIN],
+                    methods=[HttpMethod.GET],
+                ),
+            ]
+        )
+
+        app = FastAPI()
+
+        @app.get("/api/v1/users/me")
+        async def get_me():
+            return {"message": "me"}
+
+        @app.get("/api/v1/users")
+        async def get_all_users():
+            return {"message": "all users"}
+
+        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)  # type: ignore[arg-type]
+
+        client = TestClient(app, raise_server_exceptions=False)
+
+        # A regular user must still reach their own profile.
+        me_response = client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {user_token}"},
+        )
+        assert me_response.status_code == 200
+
+        # A regular user must still be refused the admin-only listing.
+        all_users_response = client.get(
+            "/api/v1/users",
+            headers={"Authorization": f"Bearer {user_token}"},
+        )
+        assert all_users_response.status_code == 401
+
+    ### Path segment boundary tests ###
+    def test_path_matching_respects_segment_boundaries(self, jwt_config: JWTConfig):
+        """Test that a configured path only matches whole path segments.
+
+        /api/v1/users must not match /api/v1/usersettings: they share a
+        string prefix but are different resources.
+        """
+        config = AuthMiddlewareConfig(
+            path_access=[
+                PathAccessConfig(
+                    path="/api/v1/users",
+                    allowed_roles=[UserRole.ADMIN],
+                    methods=[HttpMethod.GET],
+                ),
+            ]
+        )
+
+        app = FastAPI()
+
+        @app.get("/api/v1/usersettings")
+        async def get_user_settings():
+            return {"message": "settings"}
+
+        app.add_middleware(AuthMiddleware, config=config, jwt_config=jwt_config)  # type: ignore[arg-type]
+
+        client = TestClient(app, raise_server_exceptions=False)
+
+        # Unrelated path sharing a string prefix must stay public.
+        response = client.get("/api/v1/usersettings")
+        assert response.status_code == 200

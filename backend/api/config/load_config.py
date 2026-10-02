@@ -32,10 +32,15 @@ def deep_merge(base_dict: dict, update_dict: dict) -> dict:
     return result
 
 
+_ENV_VAR_PATTERN = re.compile(r"\$\{([^:}]+)(?::([^}]*))?}")
+
+
 def replace_env_variables(data, env_getter=os.getenv):
     """
-    Recursively replace environment variable placeholders in the format ${VAR_NAME}
-    with their actual values from the environment.
+    Recursively replace environment variable placeholders with their actual values
+    from the environment. Supports both ${VAR_NAME} and ${VAR_NAME:default} forms.
+    For the second form, the default is used when the variable is unset, and may
+    itself contain colons.
 
     :param data: The data structure to process (dict, list, string, or scalar)
     :param env_getter: Function to get environment variables (default: os.getenv), injectable for testing
@@ -51,15 +56,18 @@ def replace_env_variables(data, env_getter=os.getenv):
 
         def replace_var(match):
             var_name = match.group(1)
+            default = match.group(2)
             env_value = env_getter(var_name)
-            if env_value is None:
-                logger.warning(
-                    f"Environment variable '{var_name}' not found, keeping placeholder"
-                )
-                return match.group(0)
-            return env_value
+            if env_value is not None:
+                return env_value
+            if default is not None:
+                return default
+            logger.warning(
+                f"Environment variable '{var_name}' not found, keeping placeholder"
+            )
+            return match.group(0)
 
-        return re.sub(r"\$\{([^}]+)}", replace_var, data)
+        return _ENV_VAR_PATTERN.sub(replace_var, data)
     else:
         return data
 
@@ -159,6 +167,29 @@ def get_config_paths_for_deployment(deployment_type: DeploymentType) -> list[str
     return config_paths
 
 
+def validate_jwt_secret(deployment_type: DeploymentType) -> None:
+    """
+    Fail fast if JWT_SECRET_KEY is not set outside the test deployment type.
+
+    default_config.yaml ships a fallback secret so local setup works without
+    extra steps, but that fallback is a constant committed to the repository.
+    Using it in any real deployment means tokens can be forged by anyone who
+    can read the source.
+
+    :param deployment_type: the current deployment type
+    :raises ValueError: if JWT_SECRET_KEY is unset and deployment_type is not TEST
+    """
+    if deployment_type == DeploymentType.TEST:
+        return
+
+    if not os.getenv("JWT_SECRET_KEY"):
+        raise ValueError(
+            "JWT_SECRET_KEY environment variable must be set for deployment type "
+            f"'{deployment_type.value}'. Refusing to start with the default "
+            "signing key from default_config.yaml."
+        )
+
+
 def get_config_from_files() -> ApplicationConfig:
     """
     Load the application configuration from files based on the deployment type.
@@ -166,6 +197,7 @@ def get_config_from_files() -> ApplicationConfig:
     :return: ApplicationConfig instance
     """
     deployment_type = get_deployment_type()
+    validate_jwt_secret(deployment_type)
     config_paths = get_config_paths_for_deployment(deployment_type)
     config_data = load_and_merge_configs(config_paths)
     config_data = replace_env_variables(config_data)
