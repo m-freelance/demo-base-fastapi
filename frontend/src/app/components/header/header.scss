@@ -1,0 +1,18 @@
+@use '../../design-system/tokens/breakpoints' as breakpoints;
+
+// Mobile only: the link area slides open instead of snapping into place. The
+// design system handles everything else about the bar.
+.ds-nav__collapse {
+  @media (max-width: #{breakpoints.$breakpoint-lg - 0.02px}) {
+    overflow: hidden;
+    transition: max-height var(--ds-duration-base) var(--ds-easing-standard);
+
+    &.is-collapsed {
+      max-height: 0;
+    }
+
+    &.is-open {
+      max-height: 500px;
+    }
+  }
+}

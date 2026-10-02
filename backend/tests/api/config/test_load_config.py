@@ -140,6 +140,62 @@ class TestReplaceEnvVariables:
         result = replace_env_variables("${EMPTY}", env.get)
         assert result == ""
 
+    def test_var_with_default_uses_env_value_when_set(self):
+        """Test ${VAR:default} uses the env value when the var is set."""
+        env = {"JWT_SECRET_KEY": "super-secret-from-env"}
+        result = replace_env_variables(
+            "${JWT_SECRET_KEY:your-secret-key-change-in-production}", env.get
+        )
+        assert result == "super-secret-from-env"
+
+    def test_var_with_default_uses_default_when_unset(self):
+        """Test ${VAR:default} falls back to the default when the var is unset."""
+        result = replace_env_variables(
+            "${JWT_SECRET_KEY:your-secret-key-change-in-production}", lambda k: None
+        )
+        assert result == "your-secret-key-change-in-production"
+
+    def test_default_containing_colon_is_preserved(self):
+        """Test that a default value with its own colons is kept intact."""
+        result = replace_env_variables(
+            "${DATABASE_URL:postgresql://user:pass@localhost:5432/db}",
+            lambda k: None,
+        )
+        assert result == "postgresql://user:pass@localhost:5432/db"
+
+    def test_plain_var_form_still_works_without_colon(self):
+        """Test that ${VAR} without a default still works like before."""
+        env = {"MY_VAR": "my_value"}
+        result = replace_env_variables("${MY_VAR}", env.get)
+        assert result == "my_value"
+
+    def test_plain_var_unset_still_keeps_placeholder(self):
+        """Test that ${VAR} without a default still keeps the placeholder when unset."""
+        result = replace_env_variables("${MISSING}", lambda k: None)
+        assert result == "${MISSING}"
+
+    def test_nested_structures_with_default_placeholders(self):
+        """Test that ${VAR:default} is resolved recursively in dicts and lists."""
+        env = {"SET_VAR": "set-value"}
+        data = {
+            "outer": {
+                "with_default_set": "${SET_VAR:fallback}",
+                "with_default_unset": "${UNSET_VAR:fallback-value}",
+            },
+            "items": [
+                "${SET_VAR:fallback}",
+                "${UNSET_VAR:fallback-value}",
+            ],
+        }
+        result = replace_env_variables(data, env.get)
+        assert result == {
+            "outer": {
+                "with_default_set": "set-value",
+                "with_default_unset": "fallback-value",
+            },
+            "items": ["set-value", "fallback-value"],
+        }
+
 
 @pytest.mark.unit
 class TestParseConfig:
@@ -264,3 +320,56 @@ class TestGetConfigPathsForDeployment:
             os.environ.pop("CONFIG_PATHS", None)
             with pytest.raises(ValueError):
                 get_config_paths_for_deployment(DeploymentType.DEVELOPMENT)
+
+
+@pytest.mark.unit
+class TestValidateJwtSecret:
+    """Tests for validate_jwt_secret, the fail-fast check for the JWT signing key.
+
+    default_config.yaml ships a fallback secret for convenience. These tests
+    make sure that fallback cannot be used outside the test deployment type.
+    """
+
+    def test_raises_when_unset_for_local(self):
+        """Test that LOCAL deployment without JWT_SECRET_KEY raises."""
+        from backend.api.config.load_config import validate_jwt_secret
+
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("JWT_SECRET_KEY", None)
+            with pytest.raises(ValueError) as exc_info:
+                validate_jwt_secret(DeploymentType.LOCAL)
+            assert "JWT_SECRET_KEY" in str(exc_info.value)
+
+    def test_raises_when_unset_for_production(self):
+        """Test that PRODUCTION deployment without JWT_SECRET_KEY raises."""
+        from backend.api.config.load_config import validate_jwt_secret
+
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("JWT_SECRET_KEY", None)
+            with pytest.raises(ValueError):
+                validate_jwt_secret(DeploymentType.PRODUCTION)
+
+    def test_raises_when_unset_for_development(self):
+        """Test that DEVELOPMENT deployment without JWT_SECRET_KEY raises."""
+        from backend.api.config.load_config import validate_jwt_secret
+
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("JWT_SECRET_KEY", None)
+            with pytest.raises(ValueError):
+                validate_jwt_secret(DeploymentType.DEVELOPMENT)
+
+    def test_does_not_raise_when_set(self):
+        """Test that a configured JWT_SECRET_KEY passes for any deployment type."""
+        from backend.api.config.load_config import validate_jwt_secret
+
+        with patch.dict(os.environ, {"JWT_SECRET_KEY": "a-real-secret"}):
+            validate_jwt_secret(DeploymentType.PRODUCTION)
+            validate_jwt_secret(DeploymentType.LOCAL)
+
+    def test_does_not_raise_for_test_deployment_even_when_unset(self):
+        """Test that TEST deployment never requires JWT_SECRET_KEY to be set."""
+        from backend.api.config.load_config import validate_jwt_secret
+
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("JWT_SECRET_KEY", None)
+            validate_jwt_secret(DeploymentType.TEST)

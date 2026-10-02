@@ -14,6 +14,7 @@ A production-ready FastAPI application template with authentication, user manage
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [API Documentation](#-api-documentation)
+- [Frontend](#-frontend)
 - [Development](#-development)
 - [Testing](#-testing)
 - [Configuration](#-configuration)
@@ -27,8 +28,9 @@ A production-ready FastAPI application template with authentication, user manage
 - **🗃️ Database** - Async PostgreSQL with SQLAlchemy 2.0 and Alembic migrations
 - **🐳 Docker Ready** - Multi-stage Docker builds for development and production
 - **⚙️ Configuration** - YAML-based configuration with environment overrides
-- **🧪 Testing** - Comprehensive test suite with pytest
+- **🧪 Testing** - pytest suite split into unit, integration and release markers
 - **📝 API Docs** - Interactive OpenAPI (Swagger) documentation
+- **🖥️ Frontend** - Angular 21 SPA with guards, an auth interceptor, and a swappable design system
 
 ## 🛠️ Tech Stack
 
@@ -40,6 +42,8 @@ A production-ready FastAPI application template with authentication, user manage
 | Authentication | JWT (PyJWT) + Argon2 |
 | Validation | Pydantic v2 |
 | Server | Uvicorn |
+| Frontend | Angular 21 (standalone components, signals) |
+| Frontend tests | Vitest |
 | Containerization | Docker + Docker Compose |
 
 ## 📁 Project Structure
@@ -65,10 +69,23 @@ demo-base-fastapi/
 │   │   └── test_config.yaml
 │   ├── tests/                # Test suite
 │   ├── Dockerfile
-│   ├── requirements.in
-│   └── pyproject.toml
+│   ├── pyproject.toml
+│   └── uv.lock
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/   # Shared components (header)
+│   │   │   ├── design-system/ # Design tokens and pattern classes
+│   │   │   ├── guards/       # Route guards (auth, admin)
+│   │   │   ├── interceptors/ # Auth token interceptor
+│   │   │   ├── services/     # API and state services
+│   │   │   ├── types/        # API contract types
+│   │   │   └── views/        # Page components
+│   │   └── environments/     # Dev and production API URLs
+│   ├── angular.json
+│   └── package.json
 ├── docs/
-│   └── screenshots/          # OpenAPI screenshots
+│   └── images/               # Screenshots used in this README
 ├── compose.yml
 ├── Makefile
 └── README.md
@@ -79,6 +96,7 @@ demo-base-fastapi/
 ### Prerequisites
 
 - Python 3.14+
+- [uv](https://docs.astral.sh/uv/) (install with `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - Docker & Docker Compose (for containerized setup)
 - PostgreSQL 17 (for local development without Docker)
 
@@ -119,29 +137,25 @@ demo-base-fastapi/
 
 ### Local Development (without Docker)
 
-1. **Create virtual environment**
+1. **Install dependencies**
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate
+   cd backend
+   uv sync
    ```
 
-2. **Install dependencies**
-   ```bash
-   pip install -r backend/requirements.txt
-   # For development
-   pip install -r backend/requirements-dev.txt
-   ```
+   uv creates `backend/.venv` from `uv.lock` and installs the dev group too. No
+   activation step is needed, since `uv run` uses that environment directly.
 
-3. **Configure environment**
+2. **Configure environment**
    ```bash
    export DEPLOYMENT_TYPE=local
    export DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/dbname
    export JWT_SECRET_KEY=your-secret-key
    ```
 
-4. **Run the application**
+3. **Run the application**
    ```bash
-   uvicorn backend.api.main:app --reload
+   uv run --project backend uvicorn backend.api.main:app --reload
    ```
 
 ### Additional Note
@@ -193,11 +207,40 @@ The API provides interactive documentation at:
 
 </details>
 
-> **📝 Note:** To add screenshots, save your images to the `docs/screenshots/` folder with the following names:
-> - `swagger-overview.png` - Main Swagger UI page
-> - `auth-endpoints.png` - Authentication endpoints section
-> - `user-endpoints.png` - User management endpoints section
-> - `example-request.png` - Example of a request/response
+## 🖥️ Frontend
+
+The Angular app in `frontend/` is a browser-only SPA that talks to this backend over `/api/v1`.
+It covers registration, login, a protected home and profile view, and an admin panel for
+listing users. See [frontend/README.md](frontend/README.md) for the route table, the services,
+and the local setup.
+
+Route protection comes in two layers. `authGuard` and `adminGuard` decide what Angular renders,
+and `AuthMiddleware` on the backend is the authorization boundary that every request passes
+through regardless of what the router allows.
+
+All colors, spacing and pattern classes live in `frontend/src/app/design-system/`. The views
+reference `ds-*` classes and never set a color or size directly, so editing the one token file
+`tokens/_tokens.scss` re-themes the whole app.
+
+### Login
+
+![Login view](docs/images/frontend-login.png)
+
+### Registration
+
+![Registration view after a successful sign-up](docs/images/frontend-register.png)
+
+### Home
+
+![Home view](docs/images/frontend-home.png)
+
+### Profile
+
+![Profile view showing the role badge](docs/images/frontend-profile.png)
+
+### Admin
+
+![Admin view with the paginated user table](docs/images/frontend-admin.png)
 
 ## 💻 Development
 
@@ -221,7 +264,7 @@ make migrate           # Run database migrations
 make migrate-dev       # Run migrations in dev environment
 
 # Dependencies
-make compile-deps      # Compile requirements.in to requirements.txt
+make compile-deps      # Lock and sync backend dependencies with uv
 
 # Local development
 make test-local        # Run all tests locally
@@ -232,13 +275,18 @@ make test-local-fast   # Run tests excluding release tests locally
 
 ### Dependency Management
 
-This project uses `pip-tools` for dependency management:
+This project uses uv for dependency management.
+
+Runtime dependencies go in `[project.dependencies]` in `backend/pyproject.toml`.
+Test and lint tooling is in the `dev` dependency group. `backend/uv.lock` records the
+resolved versions and is committed, so CI and Docker install what you install locally.
 
 ```bash
-# Install pip-tools
-pip install pip-tools
+# Add or change a dependency
+cd backend
+uv add "fastapi>=0.135.1"
 
-# Compile dependencies
+# Re-lock and sync after editing pyproject.toml by hand
 make compile-deps
 ```
 
@@ -280,6 +328,11 @@ Configuration is managed through YAML files in `backend/resources/`:
 | `local_config.yaml` | Local development settings |
 | `prod_config.yaml` | Production settings |
 | `test_config.yaml` | Test environment settings |
+
+`local_config.yaml` is tracked in git on purpose. It only sets the Angular dev
+server's CORS origin (`http://localhost:4200`), nothing secret, and the local
+dev stack needs it to be present on a fresh checkout. Real secrets still come
+from environment variables, not from files in this folder.
 
 ### Environment Variables
 

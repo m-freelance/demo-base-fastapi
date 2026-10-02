@@ -1,6 +1,6 @@
 # Makefile for demo-base-fastapi
 
-.PHONY: help build build-dev up up-dev down logs shell test test-local test-unit test-fast test-release test-local-unit test-local-fast test-local-release clean compile-deps
+.PHONY: help build build-dev up up-dev down logs shell test test-local test-unit test-fast test-release test-local-unit test-local-fast test-local-release clean compile-deps format format-check migrate migrate-dev
 
 # Default target
 help:
@@ -21,7 +21,9 @@ help:
 	@echo "  test-local-release - Run only release tests (with database)"
 	@echo "  test-local-fast    - Run tests excluding release tests"
 	@echo "  clean        - Remove containers, images, and volumes"
-	@echo "  compile-deps - Compile requirements.in to requirements.txt"
+	@echo "  compile-deps - Lock and sync backend dependencies with uv"
+	@echo "  format       - Run isort and black over the backend"
+	@echo "  format-check - Check formatting and run mypy over the backend"
 	@echo "  migrate      - Run database migrations"
 
 ### Docker related targets ###
@@ -89,29 +91,29 @@ migrate-dev:
 	docker compose exec backend-dev alembic upgrade head
 
 ### Local development targets ###
-# Compile dependencies
+# Refresh uv.lock and the backend virtualenv
 compile-deps:
-	cd backend && pip-compile requirements.in -o requirements.txt --strip-extras
-	cd backend && pip-compile requirements-dev.in -o requirements-dev.txt --strip-extras
+	cd backend && uv lock
+	cd backend && uv sync
 
 # Run all tests locally
 test-local:
-	cd backend && PYTHONPATH=.. python -m pytest tests -v
+	cd backend && PYTHONPATH=.. uv run pytest tests -v
 
 # Run only unit tests (fast, no database)
 test-local-unit:
-	cd backend && PYTHONPATH=.. python -m pytest tests -m "unit" -v
+	cd backend && PYTHONPATH=.. uv run pytest tests -m "unit" -v
 
 # Run only release tests (with database)
 test-local-release:
-	cd backend && PYTHONPATH=.. python -m pytest tests -m "release" -v
+	cd backend && PYTHONPATH=.. uv run pytest tests -m "release" -v
 
 # Run tests excluding release tests (for CI fast feedback)
 test-local-fast:
-	cd backend && PYTHONPATH=.. python -m pytest tests -m "not release" -v
+	cd backend && PYTHONPATH=.. uv run pytest tests -m "not release" -v
 
 format:
-	cd backend && isort . && black .
+	cd backend && uv run isort . && uv run black .
 
 format-check:
-	cd backend && isort --check-only . && black --check . && mypy . --ignore-missing-imports
+	cd backend && uv run isort --check-only . && uv run black --check . && uv run mypy . --ignore-missing-imports

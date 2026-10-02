@@ -55,28 +55,26 @@ docker compose --profile dev up -d backend-dev
 
 ## Dependency Management
 
-This project uses `pip-tools` for dependency management:
+This project uses uv for dependency management:
 
 ### Files
 
-- `requirements.in` - Base production dependencies
-- `requirements-dev.in` - Development dependencies (includes base)
-- `requirements.txt` - Compiled production dependencies (auto-generated)
-- `requirements-dev.txt` - Compiled dev dependencies (auto-generated)
+- `pyproject.toml` - Runtime dependencies plus the `dev` dependency group
+- `uv.lock` - Resolved versions, committed to the repository
 
-### Compile dependencies locally
+### Update dependencies locally
+
+The image installs from `uv.lock` with `uv sync --frozen`, so a stale lockfile fails
+the build rather than resolving to something else. Re-lock before you build.
 
 ```bash
-# Install pip-tools
-pip install pip-tools
-
-# Compile requirements
+# Re-lock and sync
 make compile-deps
 
 # Or manually:
 cd backend
-pip-compile requirements.in -o requirements.txt --strip-extras
-pip-compile requirements-dev.in -o requirements-dev.txt --strip-extras
+uv lock
+uv sync
 ```
 
 ## Health Checks

@@ -1,0 +1,113 @@
+<div class="profile-view ds-view">
+  <div class="ds-page">
+    <div class="ds-page__row ds-page__row--centered">
+      <div class="ds-page__col ds-page__col--narrow">
+
+        <!-- Loading State -->
+        @if (isLoading()) {
+          <div class="ds-card">
+            <div class="ds-card__body ds-card__state">
+              <div class="ds-spinner ds-spinner--primary" role="status">
+                <span class="ds-visually-hidden">Loading...</span>
+              </div>
+              <p class="ds-text-muted">Loading profile...</p>
+            </div>
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (error() && !isLoading()) {
+          <div class="ds-alert ds-alert--danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill ds-icon"></i>
+            Failed to load profile information. Please try again later.
+          </div>
+        }
+
+        <!-- Profile Card -->
+        @if (currentUser() && !isLoading()) {
+          <div class="ds-card ds-card--raised">
+            <div class="ds-card__header ds-card__header--inverse">
+              <h4 class="ds-card__title">
+                <i class="bi bi-person-circle ds-icon"></i>
+                User Profile
+              </h4>
+            </div>
+            <div class="ds-card__body">
+              <!-- Avatar Section -->
+              <div class="profile-identity ds-text-centered">
+                <div class="avatar-circle">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <h5>{{ currentUser()?.email }}</h5>
+                <span class="ds-badge"
+                      [class.ds-badge--danger]="isAdmin()"
+                      [class.ds-badge--primary]="!isAdmin()">
+                  {{ currentUser()?.role | uppercase }}
+                </span>
+              </div>
+
+              <hr class="ds-divider">
+
+              <!-- User Details -->
+              <div class="user-details ds-detail-list">
+                <div class="ds-detail-row">
+                  <div class="ds-detail-row__label">
+                    <strong><i class="bi bi-envelope ds-icon"></i>Email:</strong>
+                  </div>
+                  <div class="ds-detail-row__value ds-text-muted">
+                    {{ currentUser()?.email }}
+                  </div>
+                </div>
+
+                <div class="ds-detail-row">
+                  <div class="ds-detail-row__label">
+                    <strong><i class="bi bi-key ds-icon"></i>User ID:</strong>
+                  </div>
+                  <div class="ds-detail-row__value ds-text-muted">
+                    <code>{{ currentUser()?.user_uuid }}</code>
+                  </div>
+                </div>
+
+                <div class="ds-detail-row">
+                  <div class="ds-detail-row__label">
+                    <strong><i class="bi bi-person-badge ds-icon"></i>Role:</strong>
+                  </div>
+                  <div class="ds-detail-row__value">
+                    <span class="ds-badge"
+                          [class.ds-badge--danger]="isAdmin()"
+                          [class.ds-badge--primary]="!isAdmin()">
+                      {{ currentUser()?.role }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="ds-detail-row">
+                  <div class="ds-detail-row__label">
+                    <strong><i class="bi bi-check-circle ds-icon"></i>Status:</strong>
+                  </div>
+                  <div class="ds-detail-row__value">
+                    <span class="ds-badge"
+                          [class.ds-badge--success]="currentUser()?.is_active"
+                          [class.ds-badge--neutral]="!currentUser()?.is_active">
+                      {{ currentUser()?.is_active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Admin Badge -->
+              @if (isAdmin()) {
+                <hr class="ds-divider">
+                <div class="ds-alert ds-alert--info">
+                  <i class="bi bi-shield-check ds-icon"></i>
+                  You have administrator privileges.
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>

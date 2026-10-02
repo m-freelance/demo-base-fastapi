@@ -1,0 +1,77 @@
+// Data table plus the pagination control that sits under it.
+
+// Wrapper that keeps a wide table scrollable instead of breaking the layout.
+.ds-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--ds-color-text-default);
+
+  th,
+  td {
+    padding: var(--ds-space-3) var(--ds-space-4);
+    border-bottom: var(--ds-border-width) solid var(--ds-color-border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: var(--ds-font-weight-semibold);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.ds-table__head {
+  background-color: var(--ds-color-surface-sunken);
+}
+
+.ds-table--hover tbody tr:hover {
+  background-color: var(--ds-color-surface-hover);
+}
+
+.ds-pagination {
+  display: flex;
+  justify-content: center;
+  gap: var(--ds-space-1);
+}
+
+.ds-pagination__item {
+  display: block;
+}
+
+.ds-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background-color: var(--ds-color-surface-raised);
+  border: var(--ds-border-width) solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-color-text-link);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--ds-color-surface-hover);
+  }
+}
+
+.ds-pagination__item--active .ds-pagination__link {
+  background-color: var(--ds-color-primary);
+  border-color: var(--ds-color-primary);
+  color: var(--ds-color-primary-on);
+}
+
+.ds-pagination__item--disabled .ds-pagination__link {
+  background-color: var(--ds-color-surface-raised);
+  color: var(--ds-color-text-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}

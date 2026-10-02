@@ -1,0 +1,62 @@
+<div class="login-view ds-view--centered">
+  <div class="ds-card ds-card--form">
+    <div class="ds-card__header">
+      <h4 class="ds-card__title">Login</h4>
+    </div>
+    <div class="ds-card__body">
+      @if (errorMessage()) {
+        <div class="ds-alert ds-alert--danger" role="alert">
+          <i class="bi bi-exclamation-circle-fill ds-icon"></i>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+      <div class="ds-field">
+        <label for="email" class="ds-field__label">Email</label>
+        <div class="ds-field__group">
+          <span class="ds-field__addon"><i class="bi bi-envelope"></i></span>
+          <input
+            type="email"
+            class="ds-field__control"
+            id="email"
+            placeholder="Enter your email"
+            [(ngModel)]="email"
+            [disabled]="isLoading()"
+            (keyup.enter)="onLogin()">
+        </div>
+      </div>
+      <div class="ds-field">
+        <label for="password" class="ds-field__label">Password</label>
+        <div class="ds-field__group">
+          <span class="ds-field__addon"><i class="bi bi-lock"></i></span>
+          <input
+            [type]="hidePassword() ? 'password' : 'text'"
+            class="ds-field__control"
+            id="password"
+            placeholder="Enter your password"
+            [(ngModel)]="password"
+            [disabled]="isLoading()"
+            (keyup.enter)="onLogin()">
+          <button class="ds-button ds-button--quiet" type="button" (click)="togglePasswordVisibility()">
+            <i class="bi" [class.bi-eye-slash]="hidePassword()" [class.bi-eye]="!hidePassword()"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="ds-card__footer">
+      <button
+        class="ds-button ds-button--primary ds-button--block"
+        [disabled]="isLoading()"
+        (click)="onLogin()">
+        @if (isLoading()) {
+          <span class="ds-spinner ds-spinner--small" role="status" aria-hidden="true"></span>
+          Loading...
+        } @else {
+          Login
+        }
+      </button>
+      <p class="register-link ds-text-centered">
+        Don't have an account? <a routerLink="/register">Register here</a>
+      </p>
+    </div>
+  </div>
+</div>

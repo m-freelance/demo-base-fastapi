@@ -1,0 +1,6 @@
+// Global stylesheet. All visual decisions live in the design system module, so
+// this file only wires it up and loads the icon font.
+@use './app/design-system/theme';
+
+/* Bootstrap Icons is a plain stylesheet with a font-face, so it stays a CSS import. */
+@import 'bootstrap-icons/font/bootstrap-icons.css';

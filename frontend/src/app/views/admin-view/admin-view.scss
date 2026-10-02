@@ -1,0 +1,11 @@
+// Table and pagination styling lives in the design system. This view only
+// tightens the UUID column and the caption under the pager.
+.admin-view {
+  .ds-table code {
+    font-size: var(--ds-font-size-xs);
+  }
+
+  .pagination-summary {
+    margin-top: var(--ds-space-2);
+  }
+}

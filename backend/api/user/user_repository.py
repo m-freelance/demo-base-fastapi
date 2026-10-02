@@ -1,5 +1,7 @@
-from fastapi_pagination import Page
-from fastapi_pagination.ext.sqlalchemy import paginate
+from typing import cast
+
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import Selectable, apaginate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,7 +39,9 @@ class UserRepository:
         user = optional_user.scalar_one_or_none()
         return user
 
-    async def get_all_users(self, session: AsyncSession, page_params) -> Page[User]:
+    async def get_all_users(
+        self, session: AsyncSession, page_params: Params
+    ) -> Page[User]:
         """
         get a list of all users in the database with pagination support.
 
@@ -48,4 +52,8 @@ class UserRepository:
         """
 
         statement = select(User)
-        return await paginate(session, statement, page_params)
+        # select(User) is typed by SQLAlchemy as Select[User], but apaginate's
+        # stub expects Select[tuple[Any, ...]]. Both describe the same object
+        # at runtime, single-entity selects just use a different generic shape
+        # than the stub accounts for, so this cast only bridges a type stub gap.
+        return await apaginate(session, cast(Selectable, statement), page_params)

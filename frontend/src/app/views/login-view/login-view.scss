@@ -1,0 +1,8 @@
+// Centering and card width come from the design system. Only the footer link
+// needs spacing of its own.
+.login-view {
+  .register-link {
+    margin-top: var(--ds-space-4);
+    color: var(--ds-color-text-muted);
+  }
+}

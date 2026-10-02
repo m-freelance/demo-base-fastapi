@@ -1,0 +1,28 @@
+// Only the avatar and a couple of spacing choices are specific to this view.
+.profile-view {
+  .profile-identity {
+    margin-bottom: var(--ds-space-5);
+  }
+
+  .avatar-circle {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto var(--ds-space-4);
+    border-radius: var(--ds-radius-circle);
+    background-color: var(--ds-color-neutral);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ds-color-neutral-on);
+    font-size: var(--ds-font-size-2xl);
+  }
+
+  .profile-identity h5 {
+    margin-bottom: var(--ds-space-1);
+  }
+
+  // UUIDs have no spaces to break on.
+  .user-details code {
+    word-break: break-all;
+  }
+}

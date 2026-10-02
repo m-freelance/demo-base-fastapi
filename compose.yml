@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   database:
     image: postgres:17.0
@@ -38,7 +36,7 @@ services:
     networks:
       - app-network
     volumes:
-      - backend-logs:/app/data/logs
+      - backend-logs:/data/logs
     restart: on-failure
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
@@ -64,8 +62,8 @@ services:
     networks:
       - app-network
     volumes:
-      - ./backend:/app
-      - backend-logs:/app/data/logs
+      - ./backend:/backend
+      - backend-logs:/data/logs
     restart: on-failure
     profiles:
       - dev

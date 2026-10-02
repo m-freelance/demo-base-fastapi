@@ -1,0 +1,106 @@
+// Alerts, badges and the loading spinner.
+
+.ds-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  margin-bottom: var(--ds-space-4);
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.ds-alert--danger {
+  background-color: var(--ds-color-danger-surface);
+  border-color: var(--ds-color-danger-border);
+  color: var(--ds-color-danger-text);
+}
+
+.ds-alert--success {
+  background-color: var(--ds-color-success-surface);
+  border-color: var(--ds-color-success-border);
+  color: var(--ds-color-success-text);
+}
+
+.ds-alert--info {
+  background-color: var(--ds-color-info-surface);
+  border-color: var(--ds-color-info-border);
+  color: var(--ds-color-info-text);
+}
+
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  padding: var(--ds-space-1) var(--ds-space-2);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-semibold);
+  line-height: var(--ds-line-height-tight);
+  white-space: nowrap;
+}
+
+.ds-badge--primary {
+  background-color: var(--ds-color-primary);
+  color: var(--ds-color-primary-on);
+}
+
+.ds-badge--danger {
+  background-color: var(--ds-color-danger);
+  color: var(--ds-color-danger-on);
+}
+
+.ds-badge--success {
+  background-color: var(--ds-color-success);
+  color: var(--ds-color-success-on);
+}
+
+.ds-badge--neutral {
+  background-color: var(--ds-color-neutral);
+  color: var(--ds-color-neutral-on);
+}
+
+// Badge used as a standalone counter, so it reads at body size.
+.ds-badge--large {
+  padding: var(--ds-space-2) var(--ds-space-3);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-regular);
+}
+
+.ds-spinner {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+  border-radius: var(--ds-radius-circle);
+  animation: ds-spinner-rotate 0.75s linear infinite;
+  vertical-align: text-bottom;
+}
+
+.ds-spinner--small {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
+
+.ds-spinner--primary {
+  color: var(--ds-color-primary);
+}
+
+@keyframes ds-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Honor a reduced motion preference by freezing the spin.
+@media (prefers-reduced-motion: reduce) {
+  .ds-spinner {
+    animation-duration: 2s;
+  }
+}

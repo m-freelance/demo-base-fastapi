@@ -4,10 +4,13 @@ Tests for TokenService.
 This module contains unit tests for JWT token creation and verification.
 """
 
+import base64
 from datetime import datetime, timedelta, timezone
 
+import jwt
 import pytest
 
+from backend.api.auth.auth_exceptions import InvalidTokenException
 from backend.api.auth.token_service import TokenData, TokenService
 from backend.api.config.models import JWTConfig
 from backend.api.schemas.user import UserRole
@@ -94,10 +97,27 @@ class TestTokenService:
     def test_verify_token_with_tampered_token_returns_none(
         self, token_service: TokenService, sample_token_data: TokenData
     ):
-        """Test that verify_token returns None for tampered token."""
+        """Test that verify_token returns None for a token whose signature was tampered with.
+
+        The signature segment is base64url-decoded and a bit is flipped in the raw
+        bytes, then re-encoded. Swapping a single base64url character is not a
+        reliable way to tamper with a token: the last character of a 4-char group
+        only encodes a few bits, and about 1 in 16 substitutions decode to the same
+        bytes, leaving the signature valid. Flipping a bit in the decoded bytes
+        always changes the signature.
+        """
         token = token_service.create_access_token(data=sample_token_data)
-        # Tamper with the token by changing a character
-        tampered_token = token[:-1] + ("a" if token[-1] != "a" else "b")
+        header_b64, payload_b64, signature_b64 = token.split(".")
+
+        # base64url strings in a JWT have no padding, add it back for decoding
+        padding = "=" * (-len(signature_b64) % 4)
+        signature_bytes = base64.urlsafe_b64decode(signature_b64 + padding)
+        tampered_bytes = bytes([signature_bytes[0] ^ 0xFF]) + signature_bytes[1:]
+        tampered_signature_b64 = (
+            base64.urlsafe_b64encode(tampered_bytes).rstrip(b"=").decode()
+        )
+
+        tampered_token = f"{header_b64}.{payload_b64}.{tampered_signature_b64}"
 
         result = token_service.verify_token(tampered_token)
 
@@ -160,6 +180,91 @@ class TestTokenService:
 
         # Expired tokens should return None
         assert result is None
+
+    def test_verify_token_with_no_exp_claim_returns_none(self, jwt_config: JWTConfig):
+        """Test that a correctly signed token without an exp claim is rejected.
+
+        PyJWT only enforces exp when present, it does not require it. A token
+        with no exp at all would otherwise authenticate forever, since there
+        is nothing for PyJWT to check.
+        """
+        token_service = TokenService(jwt_config=jwt_config)
+
+        payload = {"email": "ghost@example.com", "role": "user"}
+        token = jwt.encode(
+            payload, jwt_config.secret_key, algorithm=jwt_config.algorithm
+        )
+
+        result = token_service.verify_token(token)
+
+        assert result is None
+
+    def test_verify_token_with_legacy_expired_claim_and_no_exp_returns_none(
+        self, jwt_config: JWTConfig
+    ):
+        """Test that a token using the old custom "expired" claim is rejected.
+
+        Before the exp fix, tokens were minted with a custom "expired" claim
+        instead of the standard "exp" claim PyJWT checks. Any token issued by
+        that old code has no "exp" at all, so it must still be rejected now,
+        even though its "expired" value is long in the past.
+        """
+        token_service = TokenService(jwt_config=jwt_config)
+
+        payload = {
+            "email": "ghost@example.com",
+            "role": "user",
+            "expired": "2020-01-01T00:00:00+00:00",
+        }
+        token = jwt.encode(
+            payload, jwt_config.secret_key, algorithm=jwt_config.algorithm
+        )
+
+        result = token_service.verify_token(token)
+
+        assert result is None
+
+    def test_verify_token_with_token_minted_already_expired_returns_none(
+        self, sample_token_data: TokenData
+    ):
+        """Test that a token minted via create_access_token with an already-past
+        expiry returns None from verify_token.
+
+        access_token_expire_minutes is negative, so the token is expired the
+        moment it is created. This is the scenario the custom "expired" claim
+        bug makes impossible to detect, since PyJWT only enforces the
+        standard "exp" claim.
+        """
+        jwt_config = JWTConfig(
+            secret_key="test_secret_key_32_chars_long_xx",
+            algorithm="HS256",
+            access_token_expire_minutes=-5,
+        )
+        token_service = TokenService(jwt_config=jwt_config)
+
+        token = token_service.create_access_token(data=sample_token_data)
+        result = token_service.verify_token(token)
+
+        assert result is None
+
+    def test_verify_token_with_missing_required_field_raises_invalid_token_exception(
+        self, jwt_config: JWTConfig
+    ):
+        """Test that a token whose payload is missing a required field raises
+        InvalidTokenException instead of returning a partially-filled TokenData."""
+        token_service = TokenService(jwt_config=jwt_config)
+
+        payload = {
+            "email": "test@example.com",
+            # "role" is intentionally missing
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+        }
+        token = jwt.encode(
+            payload, jwt_config.secret_key, algorithm=jwt_config.algorithm
+        )
+
+        with pytest.raises(InvalidTokenException):
+            token_service.verify_token(token)
 
     def test_verify_token_with_empty_string_returns_none(
         self, token_service: TokenService

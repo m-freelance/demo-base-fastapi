@@ -1,0 +1,166 @@
+// Page shell and the few layout primitives the views actually repeat.
+@use '../tokens/breakpoints' as breakpoints;
+
+// Full height colored backdrop a routed view sits on.
+.ds-view {
+  min-height: calc(100vh - var(--ds-layout-nav-height));
+  background-color: var(--ds-color-surface-sunken);
+}
+
+// Centers a single card in the viewport, used by login and registration.
+.ds-view--centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--ds-space-4);
+  background-color: var(--ds-color-surface-page);
+}
+
+// Content column with page gutters.
+.ds-page {
+  width: 100%;
+  max-width: var(--ds-layout-page-max-width);
+  margin: 0 auto;
+  padding: var(--ds-space-7) var(--ds-space-4);
+}
+
+.ds-page__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-4);
+}
+
+.ds-page__row--centered {
+  justify-content: center;
+}
+
+.ds-page__col {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+// Narrow reading column for detail pages.
+.ds-page__col--narrow {
+  @media (min-width: breakpoints.$breakpoint-md) {
+    flex: 0 1 640px;
+  }
+}
+
+// Horizontal group of items that stay on one line, the d-flex row of the old
+// markup.
+.ds-cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.ds-cluster--spread {
+  justify-content: space-between;
+}
+
+.ds-cluster--end {
+  justify-content: flex-end;
+}
+
+.ds-cluster--centered {
+  justify-content: center;
+}
+
+// Vertical rhythm for stacked blocks.
+.ds-stack > * + * {
+  margin-top: var(--ds-space-4);
+}
+
+// Title row at the top of a page, with room for a counter on the far end.
+.ds-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-5);
+}
+
+.ds-page__title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+// Label and value pairs, the shape the profile details already had.
+.ds-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.ds-detail-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.ds-detail-row__label {
+  flex: 0 0 auto;
+
+  @media (min-width: breakpoints.$breakpoint-sm) {
+    flex: 0 0 33%;
+  }
+}
+
+.ds-detail-row__value {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// Leading icon inside a label, heading or button.
+.ds-icon {
+  flex: none;
+  margin-inline-end: var(--ds-space-2);
+}
+
+.ds-icon--bare {
+  margin-inline-end: 0;
+}
+
+.ds-icon--display {
+  font-size: var(--ds-font-size-display);
+  margin-inline-end: 0;
+}
+
+.ds-text-muted {
+  color: var(--ds-color-text-muted);
+}
+
+.ds-text-small {
+  font-size: var(--ds-font-size-sm);
+}
+
+.ds-text-centered {
+  text-align: center;
+}
+
+.ds-text-inverse {
+  color: var(--ds-color-text-inverse);
+}
+
+.ds-divider {
+  border: 0;
+  border-top: var(--ds-border-width) solid var(--ds-color-border);
+  margin: var(--ds-space-4) 0;
+}
+
+// Available to screen readers only.
+.ds-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
