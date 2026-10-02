@@ -329,6 +329,11 @@ Configuration is managed through YAML files in `backend/resources/`:
 | `prod_config.yaml` | Production settings |
 | `test_config.yaml` | Test environment settings |
 
+`local_config.yaml` is tracked in git on purpose. It only sets the Angular dev
+server's CORS origin (`http://localhost:4200`), nothing secret, and the local
+dev stack needs it to be present on a fresh checkout. Real secrets still come
+from environment variables, not from files in this folder.
+
 ### Environment Variables
 
 | Variable | Description | Required |

@@ -79,10 +79,13 @@ class TokenService:
                 token,
                 self._jwt_config.secret_key,
                 algorithms=[self._jwt_config.algorithm],
+                options={"require": ["exp"]},
             )
         except ExpiredSignatureError:
             return None
         except InvalidTokenError:
+            # covers a missing exp claim too, PyJWT raises MissingRequiredClaimError,
+            # a subclass of InvalidTokenError, when a required claim is absent
             return None
 
         try:

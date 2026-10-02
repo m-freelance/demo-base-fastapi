@@ -181,6 +181,49 @@ class TestTokenService:
         # Expired tokens should return None
         assert result is None
 
+    def test_verify_token_with_no_exp_claim_returns_none(self, jwt_config: JWTConfig):
+        """Test that a correctly signed token without an exp claim is rejected.
+
+        PyJWT only enforces exp when present, it does not require it. A token
+        with no exp at all would otherwise authenticate forever, since there
+        is nothing for PyJWT to check.
+        """
+        token_service = TokenService(jwt_config=jwt_config)
+
+        payload = {"email": "ghost@example.com", "role": "user"}
+        token = jwt.encode(
+            payload, jwt_config.secret_key, algorithm=jwt_config.algorithm
+        )
+
+        result = token_service.verify_token(token)
+
+        assert result is None
+
+    def test_verify_token_with_legacy_expired_claim_and_no_exp_returns_none(
+        self, jwt_config: JWTConfig
+    ):
+        """Test that a token using the old custom "expired" claim is rejected.
+
+        Before the exp fix, tokens were minted with a custom "expired" claim
+        instead of the standard "exp" claim PyJWT checks. Any token issued by
+        that old code has no "exp" at all, so it must still be rejected now,
+        even though its "expired" value is long in the past.
+        """
+        token_service = TokenService(jwt_config=jwt_config)
+
+        payload = {
+            "email": "ghost@example.com",
+            "role": "user",
+            "expired": "2020-01-01T00:00:00+00:00",
+        }
+        token = jwt.encode(
+            payload, jwt_config.secret_key, algorithm=jwt_config.algorithm
+        )
+
+        result = token_service.verify_token(token)
+
+        assert result is None
+
     def test_verify_token_with_token_minted_already_expired_returns_none(
         self, sample_token_data: TokenData
     ):

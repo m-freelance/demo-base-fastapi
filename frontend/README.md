@@ -2,8 +2,8 @@
 
 Angular 21 single-page app for the demo FastAPI backend. It covers registration, login, a
 protected home and profile view, and an admin panel for managing users. The app talks to the
-backend over REST at `${backendUrl}/api/v1` (see `src/environments/environment.ts`, which points
-at `http://localhost:8000` for local development).
+backend over REST at `${backendUrl}/api/v1`, which differs between the development and
+production builds (see [API base URL](#api-base-url)).
 
 ## Routes
 
@@ -71,6 +71,29 @@ configured `path_access` rules for every request regardless of what the frontend
 its own [README](src/app/design-system/README.md) for the full breakdown). Views never set a
 color or size directly, they only reference `ds-*` pattern classes, so the whole look of the app
 changes by editing the one token file, `tokens/_tokens.scss`.
+
+## API base URL
+
+`api-service` builds every request as `${environment.backendUrl}/api/v1`, and the two
+environment files set `backendUrl` differently:
+
+| Build | File | `backendUrl` | Request base |
+| --- | --- | --- | --- |
+| development (`npm start`) | `environment.ts` | `http://localhost:8000` | `http://localhost:8000/api/v1` |
+| production (`npm run build`) | `environment.prod.ts` | empty | `/api/v1` |
+
+Development talks to the backend cross-origin, which is why it needs the `backend-dev` profile
+and the CORS origins that come with it.
+
+The production build is same-origin instead. An empty `backendUrl` leaves `/api/v1`, which the
+browser resolves against whatever host served the app. **This assumes the deployment serves these static
+files and proxies `/api` to the backend from that same origin.** Nothing in this repo sets that
+up: `compose.yml` has no frontend service, and there is no Dockerfile or proxy config under
+`frontend/`. Deploying `dist/` is a manual step today, and wiring that proxy is part of it.
+
+Putting a hostname here instead does not work. A Compose service name such as `backend` resolves
+only inside the Compose network, never from a browser, and a hard-coded `http://` address is
+blocked as mixed content once the app is served over HTTPS.
 
 ## Local setup
 

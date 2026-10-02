@@ -1,14 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { of, throwError, firstValueFrom } from 'rxjs';
+import {
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter
+} from '@angular/router';
+import { Observable, of, throwError, firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 
 import { AuthService } from './auth-service';
 import { ApiService } from './api-service';
 import { LocalStorageService, StorageSignal } from './local-storage-service';
 import { UserInfoService } from './user-info-service';
-import { LoginResponse, RegisterResponse } from '../types';
+import { adminGuard } from '../guards/admin.guard';
+import { LoginResponse, RegisterResponse, UserInfo, UserRole } from '../types';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -68,6 +75,16 @@ describe('AuthService', () => {
       expect(mockApiService.post).toHaveBeenCalled();
       expect(result).toEqual(mockLoginResponse);
       expect(mockTokenStorage.value()).toBe('test_token');
+    });
+
+    // /login is reachable while signed in, so a successful login has to drop
+    // whatever the previous account left cached.
+    it('should clear the cached user info on success', async () => {
+      mockApiService.post.mockReturnValue(of(mockLoginResponse));
+
+      await firstValueFrom(service.login('test@example.com', 'password123'));
+
+      expect(mockUserInfoService.clearUser).toHaveBeenCalled();
     });
 
     it('should remove token on login error', async () => {
@@ -148,6 +165,98 @@ describe('AuthService', () => {
 
     it('should return false when token is null', () => {
       expect(service.isAuthenticated()).toBe(false);
+    });
+  });
+  // Real UserInfoService and real adminGuard, so these cover the whole path
+  // from a successful login through to what the guard decides next.
+  describe('switching accounts', () => {
+    let authService: AuthService;
+    let userInfoService: UserInfoService;
+    let router: Router;
+    let api: { post: Mock; get: Mock };
+
+    const adminUser: UserInfo = {
+      user_uuid: 'a',
+      email: 'admin@example.com',
+      is_active: true,
+      role: UserRole.ADMIN
+    };
+
+    const regularUser: UserInfo = {
+      user_uuid: 'b',
+      email: 'user@example.com',
+      is_active: true,
+      role: UserRole.USER
+    };
+
+    const newToken: LoginResponse = { access_token: 'token_b', token_type: 'bearer' };
+
+    const runAdminGuard = () =>
+      TestBed.runInInjectionContext(() =>
+        adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+      ) as Observable<boolean | UrlTree>;
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+
+      api = { post: vi.fn(), get: vi.fn() };
+      const tokenStorage = mockSignal(null);
+
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          UserInfoService,
+          provideRouter([]),
+          { provide: ApiService, useValue: api },
+          { provide: LocalStorageService, useValue: { connectString: () => tokenStorage } }
+        ]
+      });
+
+      authService = TestBed.inject(AuthService);
+      userInfoService = TestBed.inject(UserInfoService);
+      router = TestBed.inject(Router);
+    });
+
+    it('should not leave the previous user visible after another account logs in', async () => {
+      api.get.mockReturnValue(of(adminUser));
+      await firstValueFrom(userInfoService.loadCurrentUser());
+      expect(userInfoService.currentUser()).toEqual(adminUser);
+
+      api.post.mockReturnValue(of(newToken));
+      await firstValueFrom(authService.login('user@example.com', 'password'));
+
+      expect(userInfoService.currentUser()).not.toEqual(adminUser);
+      expect(userInfoService.currentUser()).toBeNull();
+    });
+
+    it('should not grant admin to the regular account that just logged in', async () => {
+      api.get.mockReturnValue(of(adminUser));
+      await firstValueFrom(userInfoService.loadCurrentUser());
+      await expect(firstValueFrom(runAdminGuard())).resolves.toBe(true);
+
+      api.post.mockReturnValue(of(newToken));
+      api.get.mockReturnValue(of(regularUser));
+      await firstValueFrom(authService.login('user@example.com', 'password'));
+
+      const result = await firstValueFrom(runAdminGuard());
+
+      expect(result).toBeInstanceOf(UrlTree);
+      expect(router.serializeUrl(result as UrlTree)).toBe('/home');
+    });
+
+    it('should refetch the new user rather than replay the cached response', async () => {
+      api.get.mockReturnValue(of(adminUser));
+      await firstValueFrom(userInfoService.loadCurrentUser());
+      expect(api.get).toHaveBeenCalledTimes(1);
+
+      api.post.mockReturnValue(of(newToken));
+      api.get.mockReturnValue(of(regularUser));
+      await firstValueFrom(authService.login('user@example.com', 'password'));
+
+      const next = await firstValueFrom(userInfoService.loadCurrentUser());
+
+      expect(next).toEqual(regularUser);
+      expect(api.get).toHaveBeenCalledTimes(2);
     });
   });
 });

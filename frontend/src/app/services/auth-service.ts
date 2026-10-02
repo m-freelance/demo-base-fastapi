@@ -1,4 +1,4 @@
-import { Injectable, inject, computed } from '@angular/core';
+import { Injectable, Signal, inject, computed } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
@@ -26,9 +26,17 @@ export class AuthService {
   /** Read-only signal for authentication state */
   readonly isAuthenticated = computed(() => !!this.tokenStorage.value());
 
+  /**
+   * Current token. Consumers watch the value rather than isAuthenticated
+   * because an account switch replaces one token with another and never
+   * makes isAuthenticated false.
+   */
+  readonly token: Signal<string | null>;
+
   constructor() {
     // Create reactive localStorage connection for the token
     this.tokenStorage = this.localStorageService.connectString(TOKEN_KEY, null);
+    this.token = this.tokenStorage.value;
   }
 
   /**
@@ -52,6 +60,10 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this.tokenStorage.set(response.access_token);
+          // /login has no guard, so a signed in user can sign in as someone
+          // else. Without this the old account's cached user survives, and the
+          // header, profile and admin guard trust it until the next reload.
+          this.userInfoService.clearUser();
         }),
         catchError((error) => {
           this.tokenStorage.remove();

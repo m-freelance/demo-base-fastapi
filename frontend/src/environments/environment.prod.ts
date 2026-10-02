@@ -1,5 +1,7 @@
 export const environment = {
   production: true,
-  backendUrl: 'http://backend:8000'
+  // Empty on purpose: requests resolve to /api/v1 on whatever origin serves
+  // the app, so there is no hostname to guess and no mixed content over HTTPS.
+  // The deployment has to proxy /api to the backend. See frontend/README.md.
+  backendUrl: ''
 };
-
