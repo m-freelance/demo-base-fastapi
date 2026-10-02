@@ -13,7 +13,7 @@ from backend.api.middleware import AuthMiddleware, ErrorMiddleware
 from backend.api.router import api_router, health_router
 from backend.api.utils.get_logger import get_logger
 
-_TITLE = "Demo Base FastAPI"
+_TITLE = "FastAPI + Angular Starter"
 
 _DESCRIPTION = """
 ## 🚀 Production-Ready FastAPI Template

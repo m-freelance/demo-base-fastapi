@@ -111,8 +111,8 @@ translate HTTP, services hold the rules, repositories talk to the database.
 ### With Docker
 
 ```bash
-git clone git@github.com:m-freelance/demo-base-fastapi.git
-cd demo-base-fastapi
+git clone git@github.com:m-freelance/fastapi-angular-starter.git
+cd fastapi-angular-starter
 cp .env.example .env      # set JWT_SECRET_KEY and the database credentials
 
 make up                   # or `make up-dev` for hot reload

@@ -1,4 +1,4 @@
-# Makefile for demo-base-fastapi
+# Makefile for fastapi-angular-starter
 
 .PHONY: help build build-dev up up-dev down logs shell test test-local test-unit test-fast test-release test-local-unit test-local-fast test-local-release clean compile-deps format format-check migrate migrate-dev
 

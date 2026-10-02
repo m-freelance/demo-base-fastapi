@@ -1,6 +1,6 @@
 # Docker Build Guide
 
-This document explains how to build and run the demo-base-fastapi application using Docker.
+This document explains how to build and run the fastapi-angular-starter application using Docker.
 
 ## Prerequisites
 
